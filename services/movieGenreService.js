@@ -1,0 +1,159 @@
+const MovieGenreModel = require("../models/movieGenreModel.js");
+const MovieService = require("./movieService.js");
+const GenreService = require("./genreService.js");
+const Commons = require("../common/commons.js");
+
+const createMovieGenre = async (movieId, genreId) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(movieId)) return null;
+  if (!Number.isInteger(genreId)) return null;
+
+  // Ensure there is existing movie before adding it
+  let existingMovie = await MovieService.getMovieById(movieId);
+  if (!existingMovie) {
+    console.log("Movie (" + movieId + ") not found.");
+    return null;
+  }
+
+  // Ensure there is existing genre before adding it
+  let existingGenre = await GenreService.getGenreById(genreId);
+  if (!existingGenre) {
+    console.log("Genre (" + genreId + ") not found.");
+    return null;
+  }
+
+  // Call corresponding SQL query
+  let createdMovieGenre = await MovieGenreModel.create({
+    movieId: existingMovie.movieId,
+    genreId: existingGenre.genreId,
+    createdAt: Date.now(),
+  });
+
+  createdMovieGenre.movie = existingMovie;
+  createdMovieGenre.genre = existingGenre;
+
+  // Return result back to caller
+  if (createdMovieGenre) {
+    return createdMovieGenre;
+  } else {
+    return null;
+  }
+};
+
+const updateMovieGenre = async (movieGenreId, movieId = -1, genreId = -1) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(movieGenreId)) return null;
+  if (!Number.isInteger(movieId)) return null;
+  if (!Number.isInteger(genreId)) return null;
+
+  // Ensure there is existing movieGenre before updating it
+  let existingMovieGenre = await getMovieGenreById(movieGenreId);
+  if (!existingMovieGenre) {
+    console.log("MovieGenre (" + movieGenreId + ") not found.");
+    return null;
+  }
+
+  // Ensure there is existing movie before updating it
+  let existingMovie = null;
+  if (movieId != -1) {
+    existingMovie = await MovieService.getMovieById(movieId);
+    if (!existingMovie) {
+      console.log("Movie (" + movieId + ") not found.");
+      return null;
+    }
+  }
+
+  // Ensure there is existing genre before updating it
+  let existingGenre = null;
+  if (genreId != -1) {
+    existingGenre = await GenreService.getGenreById(genreId);
+    if (!existingGenre) {
+      console.log("Genre (" + genreId + ") not found.");
+      return null;
+    }
+  }
+
+  // Process input parameters and replace existing data if necessary
+  if (existingMovie) {
+    existingMovieGenre.movieId = existingMovie.movieId;
+  }
+  if (existingGenre) {
+    existingMovieGenre.genreId = existingGenre.genreId;
+  }
+
+  // Call corresponding SQL query
+  let result = await MovieGenreModel.update(
+    {
+      movieId: existingMovieGenre.movieId,
+      genreId: existingMovieGenre.genreId,
+      updatedAt: Date.now(),
+    },
+    { where: { movieGenreId: movieGenreId } }
+  );
+
+  existingMovieGenre.movie = existingMovie;
+  existingMovieGenre.genre = existingGenre;
+
+  // Return result back to caller
+  if (result) {
+    if (result && result.length > 0 && result[0] != 0) {
+      return existingMovieGenre;
+    } else {
+      return null;
+    }
+  }
+};
+
+const getMovieGenreById = async (movieGenreId) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(movieGenreId)) return null;
+
+  // Call corresponding SQL query
+  let retrievedMovieGenre = await MovieGenreModel.findOne({
+    where: { movieGenreId: movieGenreId },
+  });
+
+  // Return result back to caller
+  if (retrievedMovieGenre) {
+    return retrievedMovieGenre;
+  } else {
+    return null;
+  }
+};
+
+const getAllMovieGenres = async () => {
+  // Call corresponding SQL query
+  let retrievedMovieGenres = await MovieGenreModel.findAll({});
+
+  // Return result back to caller
+  if (retrievedMovieGenres && retrievedMovieGenres.length > 0) {
+    return retrievedMovieGenres;
+  } else {
+    return null;
+  }
+};
+
+const deleteMovieGenreById = async (movieGenreId) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(movieGenreId)) return null;
+
+  // Call corresponding SQL query
+  let result = await MovieGenreModel.destroy({
+    where: { movieGenreId: movieGenreId },
+  });
+
+  // Return result back to caller
+  if (result) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+module.exports = {
+  createMovieGenre,
+  updateMovieGenre,
+  getMovieGenreById,
+  getAllMovieGenres,
+  deleteMovieGenreById,
+};
