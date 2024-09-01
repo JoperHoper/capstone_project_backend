@@ -1,0 +1,5 @@
+FROM node:alpine
+COPY . /capstone_backend
+WORKDIR /capstone_backend
+EXPOSE 8000
+CMD node index.js
