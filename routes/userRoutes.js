@@ -6,6 +6,10 @@ userRouter.route("/create").post(async (req, res) => {
   await UserController.createUser(req, res);
 });
 
+userRouter.route("/login").post(async (req, res) => {
+  await UserController.login(req, res);
+});
+
 userRouter.route("/update").post(async (req, res) => {
   await UserController.updateUser(req, res);
 });

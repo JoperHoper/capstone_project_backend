@@ -33,6 +33,11 @@ UserModel.init(
       allowNull: false,
       required: true,
     },
+    salt: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      required: true,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,

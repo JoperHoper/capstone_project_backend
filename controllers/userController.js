@@ -88,6 +88,63 @@ const createUser = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  if (req) {
+    if (req.body) {
+      // Validate request body parameters
+      if (!req.body.username) {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message: '"username" is not found in request.',
+        });
+        return;
+      }
+      if (!req.body.password) {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message: '"password" is not found in request.',
+        });
+        return;
+      }
+
+      // Extract and process body parameters from request
+      const username = req.body.username;
+      const password = req.body.password;
+
+      // Call corresponding service method
+      let result = await UserService.login(username, password);
+
+      // Send response back to caller based on result
+      if (result) {
+        res.status(200).send({
+          status: Constants.SUCCESS,
+          message: "Log in successful.",
+          data: result,
+        });
+        return;
+      } else {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message: "Failed to login.",
+        });
+        return;
+      }
+    } else {
+      res.status(200).send({
+        status: Constants.FAILED,
+        message: "Unable to get request body.",
+      });
+      return;
+    }
+  } else {
+    res.status(400).send({
+      status: Constants.FAILED,
+      message: "Request is invalid. Please try again.",
+    });
+    return;
+  }
+};
+
 const updateUser = async (req, res) => {
   if (req) {
     if (req.body) {
@@ -285,6 +342,7 @@ const deleteUserById = async (req, res) => {
 
 module.exports = {
   createUser,
+  login,
   updateUser,
   getUserById,
   getAllUsers,
