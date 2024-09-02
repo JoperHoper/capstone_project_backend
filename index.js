@@ -2,7 +2,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-const PORT = 3000;
+const PORT = 8000;
 
 // Import nested routes
 const actorRouter = require("./routes/actorRoutes.js");
@@ -30,7 +30,7 @@ app.use("/movie_genre", movieGenreRouter);
 app.use("/user", userRouter);
 
 // Start the server
-app.listen(PORT, (error) => {
+app.listen(PORT, "0.0.0.0", (error) => {
   if (!error) {
     console.log(
       "Server is up and running, and App is listening on port " + PORT

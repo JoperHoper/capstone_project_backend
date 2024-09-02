@@ -266,7 +266,7 @@ const getAllUsers = async (req, res) => {
         res.status(200).send({
           status: Constants.SUCCESS,
           message: "Users retrieved successfully.",
-          data: data,
+          data: result,
         });
         return;
       } else {
