@@ -1,4 +1,5 @@
 const ActorModel = require("../models/actorModel.js");
+const Commons = require("../common/commons.js");
 
 const createActor = async (name) => {
   // Ensure valid input parameters
@@ -6,7 +7,7 @@ const createActor = async (name) => {
 
   // Call corresponding SQL query
   let createdActor = await ActorModel.create({
-    name: req.body.name,
+    name: name,
     createdAt: Date.now(),
   });
 

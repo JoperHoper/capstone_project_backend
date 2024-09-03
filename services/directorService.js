@@ -1,4 +1,5 @@
 const DirectorModel = require("../models/directorModel.js");
+const Commons = require("../common/commons.js");
 
 const createDirector = async (name) => {
   // Ensure valid input parameters
@@ -6,7 +7,7 @@ const createDirector = async (name) => {
 
   // Call corresponding SQL query
   let createdDirector = await DirectorModel.create({
-    name: req.body.name,
+    name: name,
     createdAt: Date.now(),
   });
 

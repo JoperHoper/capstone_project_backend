@@ -1,5 +1,5 @@
 const MovieModel = require("../models/movieModel.js");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const Commons = require("../common/commons.js");
 
 const createMovie = async (
@@ -135,15 +135,21 @@ const getAllMovies = async (
     whereCondition.language = { [Op.like]: "%" + language + "%" };
   }
   if (fromRunningTime != -1) {
-    whereCondition.runningTime = { [Op.gte]: fromRunningTime };
+    if (!whereCondition.runningTime) {
+      whereCondition.runningTime = {};
+    }
+    whereCondition.runningTime[Op.gte] = fromRunningTime;
   }
   if (toRunningTime != -1) {
-    whereCondition.runningTime = { [Op.lte]: toRunningTime };
+    if (!whereCondition.runningTime) {
+      whereCondition.runningTime = {};
+    }
+    whereCondition.runningTime[Op.lte] = toRunningTime;
   }
-  if (fromReleaseDate != -1) {
+  if (fromReleaseDate != null) {
     whereCondition.releaseDate = { [Op.gte]: fromReleaseDate };
   }
-  if (toReleaseDate != -1) {
+  if (toReleaseDate != null) {
     whereCondition.releaseDate = { [Op.lte]: toReleaseDate };
   }
 

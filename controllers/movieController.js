@@ -246,8 +246,12 @@ const getAllMovies = async (req, res) => {
       // Extract and process body parameters from request
       const movieTitle = req.body.movieTitle ? req.body.movieTitle : "";
       const language = req.body.language ? req.body.language : "";
-      const fromRunningTime = req.body.runningTime ? req.body.runningTime : -1;
-      const toRunningTime = req.body.runningTime ? req.body.runningTime : -1;
+      const fromRunningTime = req.body.fromRunningTime
+        ? req.body.fromRunningTime
+        : -1;
+      const toRunningTime = req.body.toRunningTime
+        ? req.body.toRunningTime
+        : -1;
       let fromReleaseDate = null;
       if (req.body.fromReleaseDate) {
         fromReleaseDate = new Date(req.body.fromReleaseDate);
