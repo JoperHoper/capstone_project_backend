@@ -1,3 +1,5 @@
+CREATE DATABASE capstone_db;
+
 /* actors table */
 DROP TABLE IF EXISTS capstone_db.actors;
 CREATE TABLE capstone_db.actors (
@@ -77,7 +79,7 @@ CREATE TABLE capstone_db.rs_movie_genre (
     movieId INT NOT NULL,
 	genreId INT NOT NULL,
     createdAt DATETIME NOT NULL,
-    updatedAt DATETIME NULL,rs_movie_director
+    updatedAt DATETIME NULL,
     PRIMARY KEY (movieGenreId)
 );
 
