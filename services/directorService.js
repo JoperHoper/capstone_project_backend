@@ -5,16 +5,30 @@ const createDirector = async (name) => {
   // Ensure valid input parameters
   if (!Commons.isString(name) || name.length == 0) return null;
 
-  // Call corresponding SQL query
-  let createdDirector = await DirectorModel.create({
-    name: name,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await DirectorModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdDirector) {
-    return createdDirector;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdDirector = await DirectorModel.create(
+      {
+        name: name,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdDirector) {
+      return createdDirector;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -34,19 +48,30 @@ const updateDirector = async (directorId, name = "") => {
   // Process input parameters and replace existing data if necessary
   if (name.length > 0) existingDirector.name = name;
 
-  // Call corresponding SQL query
-  let result = await DirectorModel.update(
-    { name: name, updatedAt: Date.now() },
-    { where: { directorId: directorId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await DirectorModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingDirector;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await DirectorModel.update(
+      { name: name, updatedAt: Date.now() },
+      { where: { directorId: directorId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingDirector;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 

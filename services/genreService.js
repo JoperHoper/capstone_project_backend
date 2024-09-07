@@ -5,16 +5,30 @@ const createGenre = async (genre) => {
   // Ensure valid input parameters
   if (!Commons.isString(genre)) return null;
 
-  // Call corresponding SQL query
-  let createdGenre = await GenreModel.create({
-    genre: genre,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await GenreModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdGenre) {
-    return createdGenre;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdGenre = await GenreModel.create(
+      {
+        genre: genre,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdGenre) {
+      return createdGenre;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -34,19 +48,30 @@ const updateGenre = async (genreId, genre = "") => {
   // Process input parameters and replace existing data if necessary
   if (genre.length > 0) existingGenre.genre = genre;
 
-  // Call corresponding SQL query
-  let result = await GenreModel.update(
-    { genre: genre, updatedAt: Date.now() },
-    { where: { genreId: genreId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await GenreModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingGenre;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await GenreModel.update(
+      { genre: genre, updatedAt: Date.now() },
+      { where: { genreId: genreId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingGenre;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -81,15 +106,29 @@ const getAllGenres = async (req, res) => {
 
 const deleteGenreById = async (genreId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(genreId)) return null;
+  if (!Number.isInteger(genreId)) return false;
 
-  // Call corresponding SQL query
-  let result = await GenreModel.destroy({ where: { genreId: genreId } });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await GenreModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await GenreModel.destroy({
+      where: { genreId: genreId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };

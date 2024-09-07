@@ -1,47 +1,47 @@
-const MovieDirectorService = require("../services/movieDirectorService.js");
+const BoardFavouriteService = require("../services/boardFavouriteService.js");
 const Constants = require("../common/constants.js");
 
-const createMovieDirector = async (req, res) => {
+const createBoardFavourite = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieId) {
+      if (!req.body.boardId) {
         res.status(400).send({
           status: Constants.FAILED,
-          message: '"movieId" is not found in request.',
+          message: '"boardId" is not found in request.',
         });
         return;
       }
-      if (!req.body.directorId) {
+      if (!req.body.favouriteId) {
         res.status(400).send({
           status: Constants.FAILED,
-          message: '"actorId" is not found in request.',
+          message: '"favouriteId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieId = req.body.movieId;
-      const directorId = req.body.directorId;
+      const boardId = req.body.boardId;
+      const favouriteId = req.body.favouriteId;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.createMovieDirector(
-        movieId,
-        directorId
+      let result = await BoardFavouriteService.createBoardFavourite(
+        boardId,
+        favouriteId
       );
 
       // Send response back to caller based on result
       if (result) {
         res.status(200).send({
           status: Constants.SUCCESS,
-          message: "MovieDirector created successfully.",
+          message: "BoardFavourite created successfully.",
           data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "Failed to add MovieDirector",
+          message: "Failed to add BoardFavourite",
         });
         return;
       }
@@ -61,28 +61,28 @@ const createMovieDirector = async (req, res) => {
   }
 };
 
-const updateMovieDirector = async (req, res) => {
+const updateBoardFavourite = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieDirectorId) {
+      if (!req.body.boardFavouriteId) {
         res.status(200).send({
           status: Constants.FAILED,
-          message: '"movieDirectorId" is not found in request.',
+          message: '"boardFavouriteId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
-      const movieId = req.body.movieId ? req.body.movieId : -1;
-      const directorId = req.body.directorId ? req.body.directorId : -1;
+      const boardFavouriteId = req.body.boardFavouriteId;
+      const boardId = req.body.boardId ? req.body.boardId : -1;
+      const favouriteId = req.body.favouriteId ? req.body.favouriteId : -1;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.updateMovieDirector(
-        movieDirectorId,
-        movieId,
-        directorId
+      let result = await BoardFavouriteService.updateBoardFavourite(
+        boardFavouriteId,
+        boardId,
+        favouriteId
       );
 
       // Send response back to caller based on result
@@ -90,14 +90,14 @@ const updateMovieDirector = async (req, res) => {
         res.status(200).send({
           status: Constants.SUCCESS,
           message:
-            "MovieDirector (" + movieDirectorId + ") updated successfully.",
+            "BoardFavourite (" + boardFavouriteId + ") updated successfully.",
           data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "Failed to update Movie.",
+          message: "Failed to update BoardFavourite.",
         });
         return;
       }
@@ -117,24 +117,24 @@ const updateMovieDirector = async (req, res) => {
   }
 };
 
-const getMovieDirectorById = async (req, res) => {
+const getBoardFavouriteById = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieDirectorId) {
+      if (!req.body.boardFavouriteId) {
         res.status(200).send({
           status: Constants.FAILED,
-          message: '"movieDirectorId" is not found in request.',
+          message: '"boardFavouriteId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
+      const boardFavouriteId = req.body.boardFavouriteId;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.getMovieDirectorById(
-        movieDirectorId
+      let result = await BoardFavouriteService.getBoardFavouriteById(
+        boardFavouriteId
       );
 
       // Send response back to caller based on result
@@ -142,14 +142,14 @@ const getMovieDirectorById = async (req, res) => {
         res.status(200).send({
           status: Constants.SUCCESS,
           message:
-            "MovieDirector (" + movieDirectorId + ") retrieved successfully.",
+            "BoardFavourite (" + boardFavouriteId + ") retrieved successfully.",
           data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "MovieDirector (" + movieDirectorId + ") not found.",
+          message: "BoardFavourite (" + boardFavouriteId + ") not found.",
         });
         return;
       }
@@ -169,27 +169,31 @@ const getMovieDirectorById = async (req, res) => {
   }
 };
 
-const getAllMovieDirectors = async (req, res) => {
+const getAllBoardFavourites = async (req, res) => {
   if (req) {
     if (req.body) {
       // Extract and process body parameters from request
-      const name = req.body.name ? req.body.name : "";
+      const boardId = req.body.boardId ? req.body.boardId : -1;
+      const favouriteId = req.body.favouriteId ? req.body.favouriteId : -1;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.getAllMovieDirectors(name);
+      let result = await BoardFavouriteService.getAllBoardFavourites(
+        boardId,
+        favouriteId
+      );
 
       // Send response back to caller based on result
       if (result) {
         res.status(200).send({
           status: Constants.SUCCESS,
-          message: "MovieDirectors retrieved successfully.",
+          message: "BoardFavourites retrieved successfully.",
           data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "MovieDirectors not found.",
+          message: "BoardFavourites not found.",
         });
         return;
       }
@@ -209,24 +213,24 @@ const getAllMovieDirectors = async (req, res) => {
   }
 };
 
-const deleteMovieDirectorById = async (req, res) => {
+const deleteBoardFavouriteById = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieDirectorId) {
+      if (!req.body.boardFavouriteId) {
         res.status(200).send({
           status: Constants.FAILED,
-          message: '"movieDirectorId" is not found in request.',
+          message: '"boardFavouriteId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
+      const boardFavouriteId = req.body.boardFavouriteId;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.deleteMovieDirectorById(
-        movieDirectorId
+      let result = await BoardFavouriteService.deleteBoardFavouriteById(
+        boardFavouriteId
       );
 
       // Send response back to caller based on result
@@ -234,15 +238,15 @@ const deleteMovieDirectorById = async (req, res) => {
         res.status(200).send({
           status: Constants.SUCCESS,
           message:
-            "MovieDirector (" +
-            movieDirectorId +
+            "BoardFavourite (" +
+            boardFavouriteId +
             ") has been deleted successfully.",
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "MovieDirector (" + movieDirectorId + ") not found.",
+          message: "BoardFavourite (" + boardFavouriteId + ") not found.",
         });
         return;
       }
@@ -263,9 +267,9 @@ const deleteMovieDirectorById = async (req, res) => {
 };
 
 module.exports = {
-  createMovieDirector,
-  updateMovieDirector,
-  getMovieDirectorById,
-  getAllMovieDirectors,
-  deleteMovieDirectorById,
+  createBoardFavourite,
+  updateBoardFavourite,
+  getBoardFavouriteById,
+  getAllBoardFavourites,
+  deleteBoardFavouriteById,
 };

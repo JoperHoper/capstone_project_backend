@@ -1,47 +1,44 @@
-const MovieDirectorService = require("../services/movieDirectorService.js");
+const BoardService = require("../services/boardService.js");
 const Constants = require("../common/constants.js");
 
-const createMovieDirector = async (req, res) => {
+const createBoard = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieId) {
-        res.status(400).send({
+      if (!req.body.name) {
+        res.status(200).send({
           status: Constants.FAILED,
-          message: '"movieId" is not found in request.',
+          message: '"name" is not found in request.',
         });
         return;
       }
-      if (!req.body.directorId) {
-        res.status(400).send({
+      if (!req.body.userId) {
+        res.status(200).send({
           status: Constants.FAILED,
-          message: '"actorId" is not found in request.',
+          message: '"userId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieId = req.body.movieId;
-      const directorId = req.body.directorId;
+      const name = req.body.name;
+      const userId = req.body.userId;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.createMovieDirector(
-        movieId,
-        directorId
-      );
+      let result = await BoardService.createBoard(name, userId);
 
       // Send response back to caller based on result
       if (result) {
         res.status(200).send({
           status: Constants.SUCCESS,
-          message: "MovieDirector created successfully.",
+          message: "Board created successfully.",
           data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "Failed to add MovieDirector",
+          message: "Failed to add Board.",
         });
         return;
       }
@@ -61,135 +58,37 @@ const createMovieDirector = async (req, res) => {
   }
 };
 
-const updateMovieDirector = async (req, res) => {
+const updateBoard = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieDirectorId) {
+      if (!req.body.boardId) {
         res.status(200).send({
           status: Constants.FAILED,
-          message: '"movieDirectorId" is not found in request.',
+          message: '"boardId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
-      const movieId = req.body.movieId ? req.body.movieId : -1;
-      const directorId = req.body.directorId ? req.body.directorId : -1;
-
-      // Call corresponding service method
-      let result = await MovieDirectorService.updateMovieDirector(
-        movieDirectorId,
-        movieId,
-        directorId
-      );
-
-      // Send response back to caller based on result
-      if (result) {
-        res.status(200).send({
-          status: Constants.SUCCESS,
-          message:
-            "MovieDirector (" + movieDirectorId + ") updated successfully.",
-          data: result,
-        });
-        return;
-      } else {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: "Failed to update Movie.",
-        });
-        return;
-      }
-    } else {
-      res.status(200).send({
-        status: Constants.FAILED,
-        message: "Unable to get request body.",
-      });
-      return;
-    }
-  } else {
-    res.status(400).send({
-      status: Constants.FAILED,
-      message: "Request is invalid. Please try again.",
-    });
-    return;
-  }
-};
-
-const getMovieDirectorById = async (req, res) => {
-  if (req) {
-    if (req.body) {
-      // Validate request body parameters
-      if (!req.body.movieDirectorId) {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: '"movieDirectorId" is not found in request.',
-        });
-        return;
-      }
-
-      // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
-
-      // Call corresponding service method
-      let result = await MovieDirectorService.getMovieDirectorById(
-        movieDirectorId
-      );
-
-      // Send response back to caller based on result
-      if (result) {
-        res.status(200).send({
-          status: Constants.SUCCESS,
-          message:
-            "MovieDirector (" + movieDirectorId + ") retrieved successfully.",
-          data: result,
-        });
-        return;
-      } else {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: "MovieDirector (" + movieDirectorId + ") not found.",
-        });
-        return;
-      }
-    } else {
-      res.status(200).send({
-        status: Constants.FAILED,
-        message: "Unable to get request body.",
-      });
-      return;
-    }
-  } else {
-    res.status(400).send({
-      status: Constants.FAILED,
-      message: "Request is invalid. Please try again.",
-    });
-    return;
-  }
-};
-
-const getAllMovieDirectors = async (req, res) => {
-  if (req) {
-    if (req.body) {
-      // Extract and process body parameters from request
+      const boardId = req.body.boardId;
       const name = req.body.name ? req.body.name : "";
 
       // Call corresponding service method
-      let result = await MovieDirectorService.getAllMovieDirectors(name);
+      let result = await BoardService.updateBoard(boardId, name);
 
       // Send response back to caller based on result
       if (result) {
         res.status(200).send({
           status: Constants.SUCCESS,
-          message: "MovieDirectors retrieved successfully.",
+          message: "Board (" + boardId + ") updated successfully.",
           data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "MovieDirectors not found.",
+          message: "Board (" + boardId + ") not found.",
         });
         return;
       }
@@ -209,40 +108,124 @@ const getAllMovieDirectors = async (req, res) => {
   }
 };
 
-const deleteMovieDirectorById = async (req, res) => {
+const getBoardById = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.movieDirectorId) {
+      if (!req.body.boardId) {
         res.status(200).send({
           status: Constants.FAILED,
-          message: '"movieDirectorId" is not found in request.',
+          message: '"boardId" is not found in request.',
         });
         return;
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
+      const boardId = req.body.boardId;
 
       // Call corresponding service method
-      let result = await MovieDirectorService.deleteMovieDirectorById(
-        movieDirectorId
-      );
+      let result = await BoardService.getBoardById(boardId);
 
       // Send response back to caller based on result
       if (result) {
         res.status(200).send({
           status: Constants.SUCCESS,
-          message:
-            "MovieDirector (" +
-            movieDirectorId +
-            ") has been deleted successfully.",
+          message: "Board (" + boardId + ") retrieved successfully.",
+          data: result,
         });
         return;
       } else {
         res.status(200).send({
           status: Constants.FAILED,
-          message: "MovieDirector (" + movieDirectorId + ") not found.",
+          message: "Board (" + boardId + ") not found.",
+        });
+        return;
+      }
+    } else {
+      res.status(200).send({
+        status: Constants.FAILED,
+        message: "Unable to get request body.",
+      });
+      return;
+    }
+  } else {
+    res.status(400).send({
+      status: Constants.FAILED,
+      message: "Request is invalid. Please try again.",
+    });
+    return;
+  }
+};
+
+const getAllBoards = async (req, res) => {
+  if (req) {
+    if (req.body) {
+      // Extract and process body parameters from request
+      const userId = req.body.userId ? req.body.userId : -1;
+
+      // Call corresponding service method
+      let result = await BoardService.getAllBoards(userId);
+
+      // Send response back to caller based on result
+      if (result) {
+        res.status(200).send({
+          status: Constants.SUCCESS,
+          message: "Boards retrieved successfully.",
+          data: result,
+        });
+        return;
+      } else {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message: "Boards not found.",
+        });
+        return;
+      }
+    } else {
+      res.status(200).send({
+        status: Constants.FAILED,
+        message: "Unable to get request body.",
+      });
+      return;
+    }
+  } else {
+    res.status(400).send({
+      status: Constants.FAILED,
+      message: "Request is invalid. Please try again.",
+    });
+    return;
+  }
+};
+
+const deleteBoardById = async (req, res) => {
+  if (req) {
+    if (req.body) {
+      // Validate request body parameters
+      if (!req.body.boardId) {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message: '"boardId" is not found in request.',
+        });
+        return;
+      }
+
+      // Extract and process body parameters from request
+      const boardId = req.body.boardId;
+
+      // Call corresponding service method
+      let result = await BoardService.deleteBoardById(boardId);
+
+      // Send response back to caller based on result
+      if (result) {
+        res.status(200).send({
+          status: Constants.SUCCESS,
+          message: "Board (" + boardId + ") has been deleted successfully.",
+        });
+        return;
+      } else {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message: "Board (" + boardId + ") not found.",
         });
         return;
       }
@@ -263,9 +246,9 @@ const deleteMovieDirectorById = async (req, res) => {
 };
 
 module.exports = {
-  createMovieDirector,
-  updateMovieDirector,
-  getMovieDirectorById,
-  getAllMovieDirectors,
-  deleteMovieDirectorById,
+  createBoard,
+  updateBoard,
+  getBoardById,
+  getAllBoards,
+  deleteBoardById,
 };

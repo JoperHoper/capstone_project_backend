@@ -22,20 +22,34 @@ const createMovieDirector = async (movieId, directorId) => {
     return null;
   }
 
-  // Call corresponding SQL query
-  let createdMovieDirector = await MovieDirectorModel.create({
-    movieId: existingMovie.movieId,
-    directorId: existingDirector.directorId,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieDirectorModel.sequelize.transaction();
 
-  createdMovieDirector.movie = existingMovie;
-  createdMovieDirector.director = existingDirector;
+  try {
+    // Call corresponding SQL query
+    let createdMovieDirector = await MovieDirectorModel.create(
+      {
+        movieId: existingMovie.movieId,
+        directorId: existingDirector.directorId,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
 
-  // Return result back to caller
-  if (createdMovieDirector) {
-    return createdMovieDirector;
-  } else {
+    await dbTransaction.commit();
+
+    createdMovieDirector.movie = existingMovie;
+    createdMovieDirector.director = existingDirector;
+
+    // Return result back to caller
+    if (createdMovieDirector) {
+      return createdMovieDirector;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -85,26 +99,40 @@ const updateMovieDirector = async (
     existingMovieDirector.directorId = existingDirector.directorId;
   }
 
-  // Call corresponding SQL query
-  let result = await MovieDirectorModel.update(
-    {
-      movieId: existingMovieDirector.movieId,
-      directorId: existingMovieDirector.directorId,
-      updatedAt: Date.now(),
-    },
-    { where: { movieDirectorId: movieDirectorId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieDirectorModel.sequelize.transaction();
 
-  existingMovieDirector.movie = existingMovie;
-  existingMovieDirector.director = existingDirector;
+  try {
+    // Call corresponding SQL query
+    let result = await MovieDirectorModel.update(
+      {
+        movieId: existingMovieDirector.movieId,
+        directorId: existingMovieDirector.directorId,
+        updatedAt: Date.now(),
+      },
+      {
+        where: { movieDirectorId: movieDirectorId },
+        transaction: dbTransaction,
+      }
+    );
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingMovieDirector;
-    } else {
-      return null;
+    await dbTransaction.commit();
+
+    existingMovieDirector.movie = existingMovie;
+    existingMovieDirector.director = existingDirector;
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingMovieDirector;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -125,9 +153,17 @@ const getMovieDirectorById = async (movieDirectorId) => {
   }
 };
 
-const getAllMovieDirectors = async () => {
+const getAllMovieDirectors = async (name = "") => {
+  // Craft filter condition
+  let whereCondition = {};
+  if (name.length > 0) {
+    whereCondition.name = { [Op.like]: "%" + name + "%" };
+  }
+
   // Call corresponding SQL query
-  let retrievedMovieDirectors = await MovieDirectorModel.findAll({});
+  let retrievedMovieDirectors = await MovieDirectorModel.findAll({
+    where: whereCondition,
+  });
 
   // Return result back to caller
   if (retrievedMovieDirectors && retrievedMovieDirectors.length > 0) {
@@ -139,17 +175,29 @@ const getAllMovieDirectors = async () => {
 
 const deleteMovieDirectorById = async (movieDirectorId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(movieDirectorId)) return null;
+  if (!Number.isInteger(movieDirectorId)) return false;
 
-  // Call corresponding SQL query
-  let result = await MovieDirectorModel.destroy({
-    where: { movieDirectorId: movieDirectorId },
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieDirectorModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await MovieDirectorModel.destroy({
+      where: { movieDirectorId: movieDirectorId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };
