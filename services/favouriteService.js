@@ -22,17 +22,31 @@ const createFavourite = async (userId, movieId) => {
     return null;
   }
 
-  // Call corresponding SQL query
-  let createdFavourite = await FavouriteModel.create({
-    userId: existingUser.userId,
-    movieId: existingMovie.movieId,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdFavourite) {
-    return createdFavourite;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdFavourite = await FavouriteModel.create(
+      {
+        userId: existingUser.userId,
+        movieId: existingMovie.movieId,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdFavourite) {
+      return createdFavourite;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -78,23 +92,34 @@ const updateFavourite = async (favouriteId, userId = -1, movieId = -1) => {
     existingFavourite.movieId = existingMovie.movieId;
   }
 
-  // Call corresponding SQL query
-  let result = await FavouriteModel.update(
-    {
-      userId: existingFavourite.userId,
-      movieId: existingFavourite.movieId,
-      updatedAt: Date.now(),
-    },
-    { where: { favouriteId: favouriteId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingFavourite;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await FavouriteModel.update(
+      {
+        userId: existingFavourite.userId,
+        movieId: existingFavourite.movieId,
+        updatedAt: Date.now(),
+      },
+      { where: { favouriteId: favouriteId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingFavourite;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -148,17 +173,29 @@ const getAllFavourites = async () => {
 
 const deleteFavouriteById = async (favouriteId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(favouriteId)) return null;
+  if (!Number.isInteger(favouriteId)) return false;
 
-  // Call corresponding SQL query
-  let result = await FavouriteModel.destroy({
-    where: { favouriteId: favouriteId },
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await FavouriteModel.destroy({
+      where: { favouriteId: favouriteId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };

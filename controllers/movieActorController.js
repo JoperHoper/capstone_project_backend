@@ -165,8 +165,11 @@ const getMovieActorById = async (req, res) => {
 const getAllMovieActors = async (req, res) => {
   if (req) {
     if (req.body) {
+      // Extract and process body parameters from request
+      const name = req.body.name ? req.body.name : "";
+
       // Call corresponding service method
-      let result = await MovieActorService.getAllMovieActors();
+      let result = await MovieActorService.getAllMovieActors(name);
 
       // Send response back to caller based on result
       if (result) {

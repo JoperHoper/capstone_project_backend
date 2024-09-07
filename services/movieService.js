@@ -20,22 +20,35 @@ const createMovie = async (
   if (!Number.isInteger(runningTime)) return null;
   if (!Commons.isDate(releaseDate)) return null;
 
-  // Call corresponding SQL query
-  let createdMovie = await MovieModel.create({
-    movieTitle: movieTitle,
-    language: language,
-    synopsis: synopsis,
-    posterUrl: posterUrl,
-    trailerUrl: trailerUrl,
-    runningTime: runningTime,
-    releaseDate: releaseDate,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdMovie) {
-    return createdMovie;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdMovie = await MovieModel.create(
+      {
+        movieTitle: movieTitle,
+        language: language,
+        synopsis: synopsis,
+        posterUrl: posterUrl,
+        trailerUrl: trailerUrl,
+        runningTime: runningTime,
+        releaseDate: releaseDate,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdMovie) {
+      return createdMovie;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -76,28 +89,39 @@ const updateMovie = async (
   if (runningTime != -1) existingMovie.runningTime = runningTime;
   if (releaseDate != null) existingMovie.releaseDate = releaseDate;
 
-  // Call corresponding SQL query
-  let result = await MovieModel.update(
-    {
-      movieTitle: existingMovie.movieTitle,
-      language: existingMovie.language,
-      synopsis: existingMovie.synopsis,
-      posterUrl: existingMovie.posterUrl,
-      trailerUrl: existingMovie.trailerUrl,
-      runningTime: existingMovie.runningTime,
-      releaseDate: existingMovie.releaseDate,
-      updatedAt: Date.now(),
-    },
-    { where: { movieId: movieId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingMovie;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await MovieModel.update(
+      {
+        movieTitle: existingMovie.movieTitle,
+        language: existingMovie.language,
+        synopsis: existingMovie.synopsis,
+        posterUrl: existingMovie.posterUrl,
+        trailerUrl: existingMovie.trailerUrl,
+        runningTime: existingMovie.runningTime,
+        releaseDate: existingMovie.releaseDate,
+        updatedAt: Date.now(),
+      },
+      { where: { movieId: movieId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingMovie;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -126,6 +150,10 @@ const getAllMovies = async (
   fromReleaseDate = null,
   toReleaseDate = null
 ) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(fromRunningTime)) return null;
+  if (!Number.isInteger(toRunningTime)) return null;
+
   // Craft filter condition
   let whereCondition = {};
   if (movieTitle.length > 0) {
@@ -166,15 +194,29 @@ const getAllMovies = async (
 
 const deleteMovieById = async (movieId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(movieId)) return null;
+  if (!Number.isInteger(movieId)) return false;
 
-  // Call corresponding SQL query
-  let result = await MovieModel.destroy({ where: { movieId: movieId } });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await MovieModel.destroy({
+      where: { movieId: movieId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };

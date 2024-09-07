@@ -1,18 +1,20 @@
-const ActorModel = require("../models/actorModel.js");
+const BoardModel = require("../models/boardModel.js");
 const Commons = require("../common/commons.js");
 
-const createActor = async (name) => {
+const createBoard = async (name, userId) => {
   // Ensure valid input parameters
   if (!Commons.isString(name) || name.length == 0) return null;
+  if (!Number.isInteger(userId)) return null;
 
   // Start DB transaction to rollback save in case of query error
-  const dbTransaction = await ActorModel.sequelize.transaction();
+  const dbTransaction = await BoardModel.sequelize.transaction();
 
   try {
     // Call corresponding SQL query
-    let createdActor = await ActorModel.create(
+    let createdBoard = await BoardModel.create(
       {
         name: name,
+        userId: userId,
         createdAt: Date.now(),
       },
       { transaction: dbTransaction }
@@ -21,8 +23,8 @@ const createActor = async (name) => {
     await dbTransaction.commit();
 
     // Return result back to caller
-    if (createdActor) {
-      return createdActor;
+    if (createdBoard) {
+      return createdBoard;
     } else {
       return null;
     }
@@ -33,29 +35,29 @@ const createActor = async (name) => {
   }
 };
 
-const updateActor = async (actorId, name = "") => {
+const updateBoard = async (boardId, name = "") => {
   // Ensure valid input parameters
-  if (!Number.isInteger(actorId)) return null;
+  if (!Number.isInteger(boardId)) return null;
   if (!Commons.isString(name)) return null;
 
-  // Ensure there is existing movie before updating it
-  let existingActor = await getActorById(actorId);
-  if (!existingActor) {
-    console.log("Actor (" + actorId + ") not found.");
+  // Ensure there is existing board before updating it
+  let existingBoard = await getBoardById(boardId);
+  if (!existingBoard) {
+    console.log("Board (" + boardId + ") not found.");
     return null;
   }
 
   // Process input parameters and replace existing data if necessary
-  if (name.length > 0) existingActor.name = name;
+  if (name.length > 0) existingBoard.name = name;
 
   // Start DB transaction to rollback save in case of query error
-  const dbTransaction = await ActorModel.sequelize.transaction();
+  const dbTransaction = await BoardModel.sequelize.transaction();
 
   try {
     // Call corresponding SQL query
-    let result = await ActorModel.update(
-      { name: name, updatedAt: Date.now() },
-      { where: { actorId: actorId }, transaction: dbTransaction }
+    let result = await BoardModel.update(
+      { name: existingBoard.name, updatedAt: Date.now() },
+      { where: { boardId: boardId }, transaction: dbTransaction }
     );
 
     await dbTransaction.commit();
@@ -63,7 +65,7 @@ const updateActor = async (actorId, name = "") => {
     // Return result back to caller
     if (result) {
       if (result && result.length > 0 && result[0] != 0) {
-        return existingActor;
+        return existingBoard;
       } else {
         return null;
       }
@@ -75,49 +77,57 @@ const updateActor = async (actorId, name = "") => {
   }
 };
 
-const getActorById = async (actorId) => {
+const getBoardById = async (boardId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(actorId)) return null;
+  if (!Number.isInteger(boardId)) return null;
 
   // Call corresponding SQL query
-  let retrievedActor = await ActorModel.findOne({
-    where: { actorId: actorId },
+  let retrievedBoard = await BoardModel.findOne({
+    where: { boardId: boardId },
   });
 
   // Return result back to caller
-  if (retrievedActor) {
-    return retrievedActor;
+  if (retrievedBoard) {
+    return retrievedBoard;
   } else {
     return null;
   }
 };
 
-const getAllActors = async () => {
+const getAllBoards = async (userId = -1) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(userId)) return null;
+
+  // Craft filter condition
+  let whereCondition = {};
+  if (userId != -1) {
+    whereCondition.userId = userId;
+  }
+
   // Call corresponding SQL query
-  let retrievedActors = await ActorModel.findAll({});
+  let retrievedBoards = await BoardModel.findAll({ where: whereCondition });
 
   // Return result back to caller
-  if (retrievedActors && retrievedActors.length > 0) {
-    return retrievedActors;
+  if (retrievedBoards && retrievedBoards.length > 0) {
+    return retrievedBoards;
   } else {
     return null;
   }
 };
 
-const deleteActorById = async (actorId) => {
+const deleteBoardById = async (boardId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(actorId)) return false;
+  if (!Number.isInteger(boardId)) return null;
 
   // Start DB transaction to rollback save in case of query error
-  const dbTransaction = await ActorModel.sequelize.transaction();
+  const dbTransaction = await BoardModel.sequelize.transaction();
 
   try {
     // Call corresponding SQL query
-    let result = await ActorModel.destroy({
-      where: { actorId: actorId },
+    let result = await BoardModel.destroy({
+      where: { boardId: boardId },
       transaction: dbTransaction,
     });
-
     await dbTransaction.commit();
 
     // Return result back to caller
@@ -129,14 +139,14 @@ const deleteActorById = async (actorId) => {
   } catch (transactionError) {
     // If any error is experienced during query, roll back the transaction
     await dbTransaction.rollback();
-    return false;
+    return null;
   }
 };
 
 module.exports = {
-  createActor,
-  updateActor,
-  getActorById,
-  getAllActors,
-  deleteActorById,
+  createBoard,
+  updateBoard,
+  getBoardById,
+  getAllBoards,
+  deleteBoardById,
 };

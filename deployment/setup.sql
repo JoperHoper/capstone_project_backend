@@ -104,3 +104,25 @@ CREATE TABLE capstone_db.rs_movie_director (
     updatedAt DATETIME NULL,
     PRIMARY KEY (movieDirectorId)
 );
+
+/* boards table*/
+DROP TABLE IF EXISTS capstone_db.boards;
+CREATE TABLE capstone_db.boards (
+	boardId INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(255) NOT NULL,
+    userId INT NOT NULL,
+    createdAt DATETIME NOT NULL,
+    updatedAt DATETIME NULL,
+    PRIMARY KEY (boardId)
+);
+
+/* movie director relationship table */
+DROP TABLE IF EXISTS capstone_db.rs_board_favourite;
+CREATE TABLE capstone_db.rs_board_favourite (
+	boardFavouriteId INT NOT NULL AUTO_INCREMENT,
+    boardId INT NOT NULL,
+	favouriteId INT NOT NULL,
+    createdAt DATETIME NOT NULL,
+    updatedAt DATETIME NULL,
+    PRIMARY KEY (boardFavouriteId)
+);

@@ -41,21 +41,35 @@ const createUser = async (firstName, lastName, username, email, password) => {
     return null;
   }
 
-  // Call corresponding SQL query
-  let createdUser = await UserModel.create({
-    firstName: firstName,
-    lastName: lastName,
-    username: username,
-    email: email,
-    salt: userAccountSalt,
-    password: hashedPassword,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await UserModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdUser) {
-    return createdUser;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdUser = await UserModel.create(
+      {
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+        email: email,
+        salt: userAccountSalt,
+        password: hashedPassword,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdUser) {
+      return createdUser;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -142,26 +156,37 @@ const updateUser = async (
     existingUser.password = newHashedPassword;
   }
 
-  // Call corresponding SQL query
-  let result = await UserModel.update(
-    {
-      firstName: existingUser.firstName,
-      lastName: existingUser.lastName,
-      username: existingUser.username,
-      email: existingUser.email,
-      password: existingUser.password,
-      updatedAt: Date.now(),
-    },
-    { where: { userId: userId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await UserModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingUser;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await UserModel.update(
+      {
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
+        username: existingUser.username,
+        email: existingUser.email,
+        password: existingUser.password,
+        updatedAt: Date.now(),
+      },
+      { where: { userId: userId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingUser;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -223,15 +248,29 @@ const getAllUsers = async () => {
 
 const deleteUserById = async (userId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(userId)) return null;
+  if (!Number.isInteger(userId)) return false;
 
-  // Call corresponding SQL query
-  let result = await UserModel.destroy({ where: { userId: userId } });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await UserModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await UserModel.destroy({
+      where: { userId: userId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };
