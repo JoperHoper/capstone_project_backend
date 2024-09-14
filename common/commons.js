@@ -1,6 +1,8 @@
 const forge = require("node-forge");
 const fs = require("node:fs/promises");
 const path = require("path");
+const jsonWebToken = require("jsonwebtoken");
+const dotenv = require("dotenv");
 
 const isDate = (inputVariable) => {
   if (Object.prototype.toString.call(inputVariable) === "[object Date]") {
@@ -32,8 +34,27 @@ const getForgePrivateKey = async () => {
   return forgePrivateKey;
 };
 
+const authenticateToken = (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) return res.sendStatus(401);
+  // Set up environment variables for use
+  dotenv.config();
+  jsonWebToken.verify(
+    token,
+    process.env.TOKEN_SECRET.toString(),
+    (err, user) => {
+      console.log(err);
+      if (err) return res.sendStatus(403);
+      console.log(user);
+      req.user = user;
+    }
+  );
+};
+
 module.exports = {
   isDate,
   isString,
   getForgePrivateKey,
+  authenticateToken,
 };

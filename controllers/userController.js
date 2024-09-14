@@ -1,5 +1,6 @@
 const UserService = require("../services/userService.js");
 const Constants = require("../common/constants.js");
+const Commons = require("../common/commons.js");
 
 const createUser = async (req, res) => {
   if (req) {
@@ -146,6 +147,7 @@ const login = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -164,6 +166,12 @@ const updateUser = async (req, res) => {
       const username = req.body.username ? req.body.username : "";
       const email = req.body.email ? req.body.email : "";
       const password = req.body.password ? req.body.password : "";
+
+      // Ensure that only the user can retrieve their own data
+      if (req?.user?.userId && req.user.userId != userId) {
+        res.status(403).send();
+        return;
+      }
 
       // Call corresponding service method
       let result = await UserService.updateUser(
@@ -207,6 +215,7 @@ const updateUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -220,6 +229,12 @@ const getUserById = async (req, res) => {
 
       // Extract and process body parameters from request
       const userId = req.body.userId;
+
+      // Ensure that only the user can retrieve their own data
+      if (req?.user?.userId && req.user.userId != userId) {
+        res.status(403).send();
+        return;
+      }
 
       // Call corresponding service method
       let result = await UserService.getUserById(userId);

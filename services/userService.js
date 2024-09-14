@@ -3,6 +3,8 @@ const forge = require("node-forge");
 const UserModel = require("../models/userModel.js");
 const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
+const jsonWebToken = require("jsonwebtoken");
+const dotenv = require("dotenv");
 
 const createUser = async (firstName, lastName, username, email, password) => {
   // Ensure valid input parameters
@@ -99,10 +101,24 @@ const login = async (username, password) => {
 
   // If password is correct, return user information to caller
   if (existingUser.password == hashedPasswordToCompare) {
-    return existingUser;
+    // Set up environment variables for use
+    dotenv.config();
+    const accessToken = generateAccessToken(username, existingUser.userId);
+
+    return accessToken;
   }
 
   return null;
+};
+
+const generateAccessToken = (username, userId) => {
+  return jsonWebToken.sign(
+    { username: username, userId: userId },
+    process.env.TOKEN_SECRET,
+    {
+      expiresIn: "1800s",
+    }
+  );
 };
 
 const updateUser = async (

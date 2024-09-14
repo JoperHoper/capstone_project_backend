@@ -43,6 +43,11 @@ UserModel.init(
       allowNull: false,
       required: true,
     },
+    token: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      required: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
