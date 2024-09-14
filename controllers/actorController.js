@@ -1,7 +1,9 @@
 const ActorService = require("../services/actorService.js");
 const Constants = require("../common/constants.js");
+const Commons = require("../common/commons.js");
 
 const createActor = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -51,6 +53,7 @@ const createActor = async (req, res) => {
 };
 
 const updateActor = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -101,6 +104,7 @@ const updateActor = async (req, res) => {
 };
 
 const getActorById = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -150,6 +154,7 @@ const getActorById = async (req, res) => {
 };
 
 const getAllActors = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Call corresponding service method
@@ -187,6 +192,7 @@ const getAllActors = async (req, res) => {
 };
 
 const deleteActorById = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
