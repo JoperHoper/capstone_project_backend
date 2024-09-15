@@ -170,7 +170,7 @@ const getAllMovieGenres = async (movieId = -1, genreId = -1) => {
   if (retrievedGenres != null) {
     for (let i = 0; i < retrievedMovieGenres.length; i++) {
       for (let j = 0; j < retrievedGenres.length; j++) {
-        if ((retrievedMovieGenres[i].genreId = retrievedGenres[j].genreId)) {
+        if (retrievedMovieGenres[i].genreId === retrievedGenres[j].genreId) {
           retrievedMovieGenres[i].genre = retrievedGenres[j];
         }
       }
