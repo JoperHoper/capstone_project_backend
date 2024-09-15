@@ -1,6 +1,7 @@
 const MovieModel = require("../models/movieModel.js");
 const { Op, where } = require("sequelize");
 const Commons = require("../common/commons.js");
+const movieGenreService = require("./movieGenreService.js");
 
 const createMovie = async (
   movieTitle,
@@ -134,6 +135,18 @@ const getMovieById = async (movieId) => {
     where: { movieId: movieId },
   });
 
+  // Populate genre of movie object
+  let movieGenreList = await movieGenreService.getAllMovieGenres(
+    retrievedMovie.movieId,
+    -1
+  );
+  if (movieGenreList != null) {
+    retrievedMovie.genres = [];
+    for (let i = 0; i < movieGenreList.length; i++) {
+      retrievedMovie.genres.push(movieGenreList[i]);
+    }
+  }
+
   // Return result back to caller
   if (retrievedMovie) {
     return retrievedMovie;
@@ -183,6 +196,18 @@ const getAllMovies = async (
 
   // Call corresponding SQL query
   let retrievedMovies = await MovieModel.findAll({ where: whereCondition });
+
+  let retrievedMovieGenreList = await movieGenreService.getAllMovieGenres();
+  if (retrievedMovieGenreList != null) {
+    for (let i = 0; i < retrievedMovies.length; i++) {
+      retrievedMovies[i].genres = [];
+      for (let j = 0; j < retrievedMovieGenreList.length; j++) {
+        if (retrievedMovieGenreList[j].movieId === retrievedMovies[i].movieId) {
+          retrievedMovies[i].genres.push(retrievedMovieGenreList[j]);
+        }
+      }
+    }
+  }
 
   // Return result back to caller
   if (retrievedMovies && retrievedMovies.length > 0) {

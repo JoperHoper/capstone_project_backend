@@ -48,6 +48,10 @@ MovieModel.init(
       allowNull: true,
       required: false,
     },
+    genres: {
+      type: DataTypes.VIRTUAL,
+      required: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,

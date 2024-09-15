@@ -92,9 +92,15 @@ const getGenreById = async (genreId) => {
   }
 };
 
-const getAllGenres = async (req, res) => {
+const getAllGenres = async (genre = "") => {
+  // Craft filter condition
+  let whereCondition = {};
+  if (genre.length > 0) {
+    whereCondition.genre = { [Op.like]: "%" + genre + "%" };
+  }
+
   // Call corresponding SQL query
-  let retrievedGenres = await GenreModel.findAll({});
+  let retrievedGenres = await GenreModel.findAll({ where: whereCondition });
 
   // Return result back to caller
   if (retrievedGenres && retrievedGenres.length > 0) {
