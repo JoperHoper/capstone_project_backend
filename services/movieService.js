@@ -143,7 +143,9 @@ const getMovieById = async (movieId) => {
   if (movieGenreList != null) {
     retrievedMovie.genres = [];
     for (let i = 0; i < movieGenreList.length; i++) {
-      retrievedMovie.genres.push(movieGenreList[i]);
+      if (movieGenreList[i].genre != null) {
+        retrievedMovie.genres.push(movieGenreList[i].genre);
+      }
     }
   }
 
@@ -203,7 +205,9 @@ const getAllMovies = async (
       retrievedMovies[i].genres = [];
       for (let j = 0; j < retrievedMovieGenreList.length; j++) {
         if (retrievedMovieGenreList[j].movieId === retrievedMovies[i].movieId) {
-          retrievedMovies[i].genres.push(retrievedMovieGenreList[j]);
+          if (retrievedMovieGenreList[j].genre != null) {
+            retrievedMovies[i].genres.push(retrievedMovieGenreList[j].genre);
+          }
         }
       }
     }
