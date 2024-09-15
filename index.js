@@ -1,6 +1,7 @@
 // Initialize the express app with configuration settings
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const app = express();
 const PORT = 8000;
 
@@ -18,6 +19,7 @@ const movieGenreRouter = require("./routes/movieGenreRoutes.js");
 const userRouter = require("./routes/userRoutes.js");
 
 // Set up nested routes
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw());
 app.use(bodyParser.json());
