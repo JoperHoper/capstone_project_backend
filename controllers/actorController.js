@@ -104,7 +104,6 @@ const updateActor = async (req, res) => {
 };
 
 const getActorById = async (req, res) => {
-  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -154,7 +153,6 @@ const getActorById = async (req, res) => {
 };
 
 const getAllActors = async (req, res) => {
-  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Call corresponding service method

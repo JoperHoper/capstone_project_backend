@@ -194,7 +194,6 @@ const updateMovie = async (req, res) => {
 };
 
 const getMovieById = async (req, res) => {
-  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -244,7 +243,6 @@ const getMovieById = async (req, res) => {
 };
 
 const getAllMovies = async (req, res) => {
-  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Extract and process body parameters from request
