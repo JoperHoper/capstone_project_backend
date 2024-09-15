@@ -146,9 +146,36 @@ const getMovieGenreById = async (movieGenreId) => {
   }
 };
 
-const getAllMovieGenres = async () => {
+const getAllMovieGenres = async (movieId = -1, genreId = -1) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(movieId)) return null;
+  if (!Number.isInteger(genreId)) return null;
+
+  // Craft filter condition
+  let whereCondition = {};
+  if (movieId != -1) {
+    whereCondition.movieId = movieId;
+  }
+  if (genreId != -1) {
+    whereCondition.genreId = genreId;
+  }
+
   // Call corresponding SQL query
-  let retrievedMovieGenres = await MovieGenreModel.findAll({});
+  let retrievedMovieGenres = await MovieGenreModel.findAll({
+    where: whereCondition,
+  });
+
+  // Populate each movieGenre object with genre
+  let retrievedGenres = await GenreService.getAllGenres();
+  if (retrievedGenres != null) {
+    for (let i = 0; i < retrievedMovieGenres.length; i++) {
+      for (let j = 0; j < retrievedGenres.length; j++) {
+        if ((retrievedMovieGenres[i].genreId = retrievedGenres[j].genreId)) {
+          retrievedMovieGenres[i].genre = retrievedGenres[j];
+        }
+      }
+    }
+  }
 
   // Return result back to caller
   if (retrievedMovieGenres && retrievedMovieGenres.length > 0) {

@@ -12,7 +12,7 @@ const sequelize = new Sequelize(
   process.env.DB_USER,
   process.env.DB_PASSWORD,
   {
-    // host: "host.docker.internal",
+    host: "host.docker.internal",
     dialect: "mysql",
   }
 );
