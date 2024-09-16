@@ -3,16 +3,9 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createFavourite = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
-      // Validate request body parameters
-      if (!req.body.userId) {
-        res.status(400).send({
-          status: Constants.FAILED,
-          message: '"userId" is not found in request.',
-        });
-        return;
-      }
       if (!req.body.movieId) {
         res.status(400).send({
           status: Constants.FAILED,
@@ -22,7 +15,7 @@ const createFavourite = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const userId = req.body.userId;
+      const userId = req.user.userId;
       const movieId = req.body.movieId;
 
       // Call corresponding service method
