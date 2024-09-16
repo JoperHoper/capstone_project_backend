@@ -19,7 +19,13 @@ const createUser = async (firstName, lastName, username, email, password) => {
 
   // Decrypt password received from front-end page
   let passwordInBytes = forge.util.hexToBytes(password);
-  const decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  let decryptedPassword = "";
+  try {
+    decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 
   // Generate salt for this User account to store into DB
   const saltRounds = 10;
@@ -82,10 +88,20 @@ const login = async (username, password) => {
 
   // Decrypt password received from front-end page
   let passwordInBytes = forge.util.hexToBytes(password);
-  const decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  let decryptedPassword = "";
+  try {
+    decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 
   // Check if existing user with username exists
   let existingUser = await getUserByUsername(username);
+  if (existingUser == null) {
+    console.log("User with username (" + username + ") not found.");
+    return null;
+  }
 
   // Compare hashed password to check validity of input account credentials
   let hashedPasswordToCompare = "";
@@ -155,7 +171,13 @@ const updateUser = async (
 
     // Decrypt password received from front-end page
     let newPasswordInBytes = forge.util.hexToBytes(newPassword);
-    const decryptedPassword = forgePrivateKey.decrypt(newPasswordInBytes);
+    let decryptedPassword = "";
+    try {
+      decryptedPassword = forgePrivateKey.decrypt(newPasswordInBytes);
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
 
     // Generate hashed password
     let newHashedPassword = "";
