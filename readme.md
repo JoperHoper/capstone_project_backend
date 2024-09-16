@@ -14,13 +14,14 @@ Within the <b>.env</b> file, we need to include the following fields and their c
 DB_NAME=some_db
 DB_USER=some_user
 DB_PASSWORD=some_password
+TOKEN_SECRET=some_token_secret
 ```
 
 ### mySQL database and table setup
 
 Under the `/deployment/setup.sql` file contains the setup SQL queries to run to ensure that the database is ready.
 
-Be sure to run it before the running this project, as <b>Sequqlize</b> will need it.
+Be sure to run it before the running this project, as <b>Sequelize</b> will need it.
 
 ### docker deployment instructions
 
