@@ -15,8 +15,12 @@ const createFavourite = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
       const movieId = req.body.movieId;
+
+      if (userId === undefined) {
+        return;
+      }
 
       // Call corresponding service method
       let result = await FavouriteService.createFavourite(userId, movieId);
