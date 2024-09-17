@@ -1,7 +1,9 @@
 const BoardService = require("../services/boardService.js");
 const Constants = require("../common/constants.js");
+const Commons = require("../common/commons.js");
 
 const createBoard = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -12,17 +14,13 @@ const createBoard = async (req, res) => {
         });
         return;
       }
-      if (!req.body.userId) {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: '"userId" is not found in request.',
-        });
-        return;
-      }
-
       // Extract and process body parameters from request
       const name = req.body.name;
-      const userId = req.body.userId;
+      const userId = req.user?.userId;
+
+      if (userId === undefined) {
+        return;
+      }
 
       // Call corresponding service method
       let result = await BoardService.createBoard(name, userId);
@@ -158,10 +156,15 @@ const getBoardById = async (req, res) => {
 };
 
 const getAllBoards = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
       // Extract and process body parameters from request
-      const userId = req.body.userId ? req.body.userId : -1;
+      const userId = req.user?.userId;
+
+      if (userId === undefined) {
+        return;
+      }
 
       // Call corresponding service method
       let result = await BoardService.getAllBoards(userId);
