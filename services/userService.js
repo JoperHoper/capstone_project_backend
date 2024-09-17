@@ -5,6 +5,7 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 const jsonWebToken = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const BoardService = require("../services/boardService.js");
 
 const createUser = async (firstName, lastName, username, email, password) => {
   // Ensure valid input parameters
@@ -66,6 +67,9 @@ const createUser = async (firstName, lastName, username, email, password) => {
       },
       { transaction: dbTransaction }
     );
+
+    // Create a default board upon user creation
+    await BoardService.createBoard("Default", createdUser.userId);
 
     await dbTransaction.commit();
 
