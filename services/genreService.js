@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const GenreModel = require("../models/genreModel.js");
 const Commons = require("../common/commons.js");
 
