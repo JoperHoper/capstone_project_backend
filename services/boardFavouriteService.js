@@ -1,6 +1,5 @@
 const BoardFavouriteModel = require("../models/boardFavouriteModel.js");
 const BoardService = require("./boardService.js");
-const FavouriteService = require("./favouriteService.js");
 const Commons = require("../common/commons.js");
 
 const createBoardFavourite = async (boardId, favouriteId) => {
@@ -15,13 +14,6 @@ const createBoardFavourite = async (boardId, favouriteId) => {
     return null;
   }
 
-  // Ensure there is existing favourite before adding it
-  let existingFavourite = await FavouriteService.getFavouriteById(favouriteId);
-  if (!existingFavourite) {
-    console.log("Favourite (" + favouriteId + ") not found.");
-    return null;
-  }
-
   // Start DB transaction to rollback save in case of query error
   const dbTransaction = await BoardFavouriteModel.sequelize.transaction();
 
@@ -30,7 +22,7 @@ const createBoardFavourite = async (boardId, favouriteId) => {
     let createdBoardFavourite = await BoardFavouriteModel.create(
       {
         boardId: existingBoard.boardId,
-        favouriteId: existingFavourite.favouriteId,
+        favouriteId: favouriteId,
         createdAt: Date.now(),
       },
       { transaction: dbTransaction }
@@ -39,7 +31,6 @@ const createBoardFavourite = async (boardId, favouriteId) => {
     await dbTransaction.commit();
 
     createdBoardFavourite.board = existingBoard;
-    createdBoardFavourite.favourite = existingFavourite;
 
     // Return result back to caller
     if (createdBoardFavourite) {
@@ -81,22 +72,9 @@ const updateBoardFavourite = async (
     }
   }
 
-  // Ensure there is existing favourite before updating it
-  let existingFavourite = null;
-  if (favouriteId != -1) {
-    existingFavourite = await FavouriteService.getFavouriteById(favouriteId);
-    if (!existingFavourite) {
-      console.log("Favourite (" + favouriteId + ") not found.");
-      return null;
-    }
-  }
-
   // Process input parameters and replace existing data if necessary
   if (existingBoard) {
     existingBoardFavourite.boardId = existingBoard.boardId;
-  }
-  if (existingFavourite) {
-    existingBoardFavourite.favouriteId = existingFavourite.favouriteId;
   }
 
   // Start DB transaction to rollback save in case of query error
@@ -107,7 +85,7 @@ const updateBoardFavourite = async (
     let result = await BoardFavouriteModel.update(
       {
         boardId: existingBoard.boardId,
-        favouriteId: existingFavourite.favouriteId,
+        favouriteId: favouriteId,
         updatedAt: Date.now(),
       },
       {
@@ -119,7 +97,6 @@ const updateBoardFavourite = async (
     await dbTransaction.commit();
 
     existingBoardFavourite.board = existingBoard;
-    existingBoardFavourite.favourite = existingFavourite;
 
     // Return result back to caller
     if (result) {
@@ -150,13 +127,6 @@ const getBoardFavouriteById = async (boardFavouriteId) => {
   );
   if (existingBoard) {
     retrievedBoardFavourite.board = existingBoard;
-  }
-
-  const existingFavourite = await FavouriteService.getFavouriteById(
-    retrievedBoardFavourite.favouriteId
-  );
-  if (existingFavourite) {
-    retrievedBoardFavourite.favourite = existingFavourite;
   }
 
   // Return result back to caller
