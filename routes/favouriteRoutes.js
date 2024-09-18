@@ -22,4 +22,8 @@ favouriteRouter.route("/delete").post(async (req, res) => {
   await FavouriteController.deleteFavouriteById(req, res);
 });
 
+favouriteRouter.route("/delete_by_user_movie_id").post(async (req, res) => {
+  await FavouriteController.deleteFavouriteByUserAndMovieId(req, res);
+});
+
 module.exports = favouriteRouter;

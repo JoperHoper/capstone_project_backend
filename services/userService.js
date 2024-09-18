@@ -69,7 +69,7 @@ const createUser = async (firstName, lastName, username, email, password) => {
     );
 
     // Create a default board upon user creation
-    await BoardService.createBoard("Default", createdUser.userId);
+    await BoardService.createBoard(Constants.DEFAULT, createdUser.userId);
 
     await dbTransaction.commit();
 

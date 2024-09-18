@@ -22,6 +22,24 @@ const createFavourite = async (req, res) => {
         return;
       }
 
+      let checkExistingFavourite = await FavouriteService.getAllFavourites(
+        userId,
+        movieId
+      );
+      if (checkExistingFavourite) {
+        res.status(200).send({
+          status: Constants.SUCCESS,
+          message:
+            "User (" +
+            userId +
+            ") has already favourite movie (" +
+            movieId +
+            ").",
+          data: checkExistingFavourite,
+        });
+        return;
+      }
+
       // Call corresponding service method
       let result = await FavouriteService.createFavourite(userId, movieId);
 
@@ -246,10 +264,72 @@ const deleteFavouriteById = async (req, res) => {
   }
 };
 
+const deleteFavouriteByUserAndMovieId = async (req, res) => {
+  Commons.authenticateToken(req, res);
+  if (req) {
+    if (req.body) {
+      // Validate request body parameters
+      if (!req.body.movieId) {
+        res.status(400).send({
+          status: Constants.FAILED,
+          message: '"movieId" is not found in request.',
+        });
+        return;
+      }
+
+      // Extract and process body parameters from request
+      const userId = req.user?.userId;
+      const movieId = req.body.movieId;
+
+      // Call corresponding service method
+      let result = await FavouriteService.deleteFavouriteByUserAndMovieId(
+        userId,
+        movieId
+      );
+
+      // Send response back to caller based on result
+      if (result) {
+        res.status(200).send({
+          status: Constants.SUCCESS,
+          message:
+            "Favourite (" +
+            result.favouriteId +
+            ") has been deleted successfully.",
+        });
+        return;
+      } else {
+        res.status(200).send({
+          status: Constants.FAILED,
+          message:
+            "Favourite movie (" +
+            movieId +
+            ") of user (" +
+            userId +
+            ") not found.",
+        });
+        return;
+      }
+    } else {
+      res.status(200).send({
+        status: Constants.FAILED,
+        message: "Unable to get request body.",
+      });
+      return;
+    }
+  } else {
+    res.status(400).send({
+      status: Constants.FAILED,
+      message: "Request is invalid. Please try again.",
+    });
+    return;
+  }
+};
+
 module.exports = {
   createFavourite,
   updateFavourite,
   getFavouriteById,
   getAllFavourites,
   deleteFavouriteById,
+  deleteFavouriteByUserAndMovieId,
 };
