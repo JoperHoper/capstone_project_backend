@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const MovieActorModel = require("../models/movieActorModel.js");
 const MovieService = require("./movieService.js");
 const ActorService = require("./actorService.js");

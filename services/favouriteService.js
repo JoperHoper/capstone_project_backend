@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const FavouriteModel = require("../models/favouriteModel.js");
 const BoardService = require("../services/boardService.js");
 const BoardFavouriteService = require("../services/boardFavouriteService.js");
@@ -26,7 +27,7 @@ const createFavourite = async (userId, movieId) => {
   }
 
   // Ensure that the user's movie to favourite is non-existent before adding it
-  let existingFavourite = await getAllFavourites(userId, movieId);
+  let existingFavourite = await getAllFavourites(-1, userId, movieId);
   if (existingFavourite) {
     console.log(
       "User (" + userId + ") has already favourite this movie (" + movieId + ")"
@@ -195,18 +196,29 @@ const getFavouriteById = async (favouriteId) => {
   }
 };
 
-const getAllFavourites = async (userId = -1, movieId = -1) => {
+const getAllFavourites = async (
+  favouriteId = -1,
+  userId = -1,
+  movieId = -1,
+  favouriteIdArray = []
+) => {
   // Ensure valid input parameters
   if (!Number.isInteger(userId)) return null;
   if (!Number.isInteger(movieId)) return null;
 
   // Craft filter condition
   let whereCondition = {};
+  if (favouriteId != -1) {
+    whereCondition.favouriteId = favouriteId;
+  }
   if (userId != -1) {
     whereCondition.userId = userId;
   }
   if (movieId != -1) {
     whereCondition.movieId = movieId;
+  }
+  if (favouriteIdArray.length > 0) {
+    whereCondition.favouriteId = { [Op.in]: favouriteIdArray };
   }
 
   // Call corresponding SQL query
@@ -266,7 +278,7 @@ const deleteFavouriteByUserAndMovieId = async (userId = -1, movieId = -1) => {
     return null;
   }
 
-  let existingFavouriteList = await getAllFavourites(userId, movieId);
+  let existingFavouriteList = await getAllFavourites(-1, userId, movieId);
   let existingFavourite = null;
   if (existingFavouriteList != null) {
     existingFavourite = existingFavouriteList[0];

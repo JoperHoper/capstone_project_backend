@@ -1,5 +1,5 @@
 const MovieModel = require("../models/movieModel.js");
-const { Op, where } = require("sequelize");
+const { Op } = require("sequelize");
 const Commons = require("../common/commons.js");
 const movieGenreService = require("./movieGenreService.js");
 

@@ -179,10 +179,32 @@ const getFavouriteById = async (req, res) => {
 };
 
 const getAllFavourites = async (req, res) => {
+  Commons.authenticateToken(req, res);
   if (req) {
     if (req.body) {
+      // Extract and process body parameters from request
+      const favouriteId = req.body.favouriteId ? req.body.favouriteId : -1;
+      const userId = req.user?.userId;
+      const movieId = req.body.movieId ? req.body.movieId : -1;
+      const favouriteIds = req.body.favouriteIds ? req.body.favouriteIds : "";
+      let favouriteIdArray = [];
+      if (favouriteIds != "") {
+        const favouriteIdStrArray = favouriteIds.split(",");
+        if (favouriteIdStrArray.length > 0) {
+          for (let i = 0; i < favouriteIdStrArray.length; i++) {
+            let parsedFavouriteId = parseInt(favouriteIdStrArray[i]);
+            favouriteIdArray.push(parsedFavouriteId);
+          }
+        }
+      }
+
       // Call corresponding service method
-      let result = await FavouriteService.getAllFavourites();
+      let result = await FavouriteService.getAllFavourites(
+        favouriteId,
+        userId,
+        movieId,
+        favouriteIdArray
+      );
 
       // Send response back to caller based on result
       if (result) {
