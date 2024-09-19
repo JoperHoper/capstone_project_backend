@@ -226,6 +226,16 @@ const getAllFavourites = async (
     where: whereCondition,
   });
 
+  // Populate each favourite obj with its corresponding movie obj
+  for (let i = 0; i < retrievedFavourites.length; i++) {
+    let existingMovie = await MovieService.getMovieById(
+      retrievedFavourites[i].movieId
+    );
+    if (existingMovie) {
+      retrievedFavourites[i].movie = existingMovie;
+    }
+  }
+
   // Return result back to caller
   if (retrievedFavourites && retrievedFavourites.length > 0) {
     return retrievedFavourites;
