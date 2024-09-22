@@ -3,6 +3,7 @@ const fs = require("node:fs/promises");
 const path = require("path");
 const jsonWebToken = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const Constants = require("./constants.js");
 
 const isDate = (inputVariable) => {
   if (Object.prototype.toString.call(inputVariable) === "[object Date]") {
@@ -35,21 +36,40 @@ const getForgePrivateKey = async () => {
 };
 
 const authenticateToken = (req, res) => {
+  // Retrieve Json Web Token (JWT) from the request headers
   const authHeader = req.headers["authorization"];
+
+  // Accepted JWT must be in the format of "XXX actual_token_here"
   const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return res.sendStatus(401);
+  if (token == null) {
+    res.status(401).send({
+      status: Constants.ERROR,
+      message: "Invalid authentication token entered",
+    });
+    return false;
+  }
+
   // Set up environment variables for use
   dotenv.config();
+
+  // Verify JWT, and if successful, populate user information into the request
   jsonWebToken.verify(
     token,
     process.env.TOKEN_SECRET.toString(),
     (err, user) => {
-      console.log(err);
-      if (err) return res.sendStatus(403);
+      if (err) {
+        console.log(err);
+        res.status(403).send({
+          status: Constants.ERROR,
+          message: "Error during authentication - " + err.message,
+        });
+        return false;
+      }
       console.log(user);
       req.user = user;
     }
   );
+  return true;
 };
 
 module.exports = {

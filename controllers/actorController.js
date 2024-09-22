@@ -3,7 +3,9 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createActor = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -53,7 +55,9 @@ const createActor = async (req, res) => {
 };
 
 const updateActor = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -190,7 +194,9 @@ const getAllActors = async (req, res) => {
 };
 
 const deleteActorById = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters

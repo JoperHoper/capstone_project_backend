@@ -3,7 +3,9 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createMovie = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -117,7 +119,9 @@ const createMovie = async (req, res) => {
 };
 
 const updateMovie = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -325,7 +329,9 @@ const getAllMovies = async (req, res) => {
 };
 
 const deleteMovieById = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters

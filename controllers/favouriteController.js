@@ -3,7 +3,9 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createFavourite = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       if (!req.body.movieId) {
@@ -179,7 +181,9 @@ const getFavouriteById = async (req, res) => {
 };
 
 const getAllFavourites = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Extract and process body parameters from request
@@ -287,7 +291,9 @@ const deleteFavouriteById = async (req, res) => {
 };
 
 const deleteFavouriteByUserAndMovieId = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
