@@ -102,9 +102,9 @@ const updateGenre = async (req, res) => {
 
 const getGenreById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.genreId) {
+      if (!req.body.genreId && !req.query.genreId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"genreId" is not found in request.',
@@ -113,7 +113,9 @@ const getGenreById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const genreId = req.body.genreId;
+      const genreId = req.query.genreId
+        ? parseInt(req.query.genreId)
+        : parseInt(req.body.genreId);
 
       // Call corresponding service method
       let result = await GenreService.getGenreById(genreId);

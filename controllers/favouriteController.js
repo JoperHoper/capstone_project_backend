@@ -134,9 +134,9 @@ const updateFavourite = async (req, res) => {
 
 const getFavouriteById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.favouriteId) {
+      if (!req.body.favouriteId && !req.query.favouriteId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"favouriteId" is not found in request.',
@@ -145,7 +145,9 @@ const getFavouriteById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const favouriteId = req.body.favouriteId;
+      const favouriteId = req.query.favouriteId
+        ? parseInt(req.query.favouriteId)
+        : parseInt(req.body.favouriteId);
 
       // Call corresponding service method
       let result = await FavouriteService.getFavouriteById(favouriteId);

@@ -119,9 +119,9 @@ const updateBoardFavourite = async (req, res) => {
 
 const getBoardFavouriteById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.boardFavouriteId) {
+      if (!req.body.boardFavouriteId && !req.query.boardFavouriteId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"boardFavouriteId" is not found in request.',
@@ -130,7 +130,9 @@ const getBoardFavouriteById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const boardFavouriteId = req.body.boardFavouriteId;
+      const boardFavouriteId = req.query.boardFavouriteId
+        ? parseInt(req.query.boardFavouriteId)
+        : parseInt(req.body.boardFavouriteId);
 
       // Call corresponding service method
       let result = await BoardFavouriteService.getBoardFavouriteById(
