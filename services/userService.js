@@ -212,7 +212,7 @@ const updateUser = async (
         username: existingUser.username,
         email: existingUser.email,
         bio: existingUser.bio,
-        dateOfBirth: existingUser.dob,
+        dob: existingUser.dob,
         password: existingUser.password,
         updatedAt: Date.now(),
       },
