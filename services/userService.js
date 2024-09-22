@@ -271,7 +271,19 @@ const getUserByUsername = async (username) => {
   }
 };
 
-const getAllUsers = async () => {
+const getAllUsers = async (name = "", username = "", email = "") => {
+  // Craft filter condition
+  let whereCondition = {};
+  if (name.length > 0) {
+    whereCondition.name = name;
+  }
+  if (username.length > 0) {
+    whereCondition.username = username;
+  }
+  if (email.length > 0) {
+    whereCondition.email = email;
+  }
+
   // Call corresponding SQL query
   let retrievedUsers = await UserModel.findAll({
     attributes: [
@@ -282,6 +294,7 @@ const getAllUsers = async () => {
       "createdAt",
       "updatedAt",
     ],
+    where: whereCondition,
   });
 
   // Return result back to caller
