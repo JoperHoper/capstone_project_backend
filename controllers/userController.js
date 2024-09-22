@@ -147,7 +147,9 @@ const login = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -215,7 +217,9 @@ const updateUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  Commons.authenticateToken(req, res);
+  if (!Commons.authenticateToken(req, res)) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
