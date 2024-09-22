@@ -15,8 +15,7 @@ jest.mock("../../models/userModel.js", () => ({
     }),
   },
   create: jest.fn().mockResolvedValue({
-    firstName: "FirstName",
-    lastName: "LastName",
+    name: "Name",
     username: "Username",
     email: "test@testemail.com",
   }),
@@ -25,8 +24,7 @@ jest.mock("../../models/userModel.js", () => ({
   update: jest.fn().mockResolvedValue([
     {
       userId: 1,
-      firstName: "FirstName",
-      lastName: "LastName",
+      name: "Name",
       username: "Username",
       email: "test@testemail.com",
     },
@@ -43,35 +41,31 @@ test("should return object with userId = (inputUserId) if retrieved", async (inp
 
 // =============
 // Test 2 - Test create new User success
-test("should return object with firstName = (inputFirstname) if saved", async (inputFirstName = "FirstName", inputLastName = "LastName", inputUsername = "Username", inputEmail = "test@testemail.com", inputPassword = "a26ff51714e28df1c5c18822af0c9627dd6da46556dc341b84fcb4a31f8668ed249612120f8593b1ddc249876344fae1cac1c2c8f793c047a99c0637a144bd33d3d3da4f68c86b88c1ed4d217feec05e09245af3d7555563945d7263d323b349d108f29b03c8b02088f18b8d0a86aaa3f828118fff413693be5227c66aa62f51de1d9e17d2892dc4be61aa352375178eb7f36aefabc5f69da01ce9fc1d6b17cdf5b23ee5ffb0c5bd0e04182edbe2c0e52f8d9d3fdbcc720c16a1647813bac9b1b466638c3906f8dca1e3211ed607049c02a483768d9afc07849ad6d35cb15d6f9c1de83c2eeeb881f4fed0bf07100d193b1faffb54839417195de9b81d12f3ee") => {
+test("should return object with name = (inputName) if saved", async (inputName = "Name", inputUsername = "Username", inputEmail = "test@testemail.com", inputPassword = "a26ff51714e28df1c5c18822af0c9627dd6da46556dc341b84fcb4a31f8668ed249612120f8593b1ddc249876344fae1cac1c2c8f793c047a99c0637a144bd33d3d3da4f68c86b88c1ed4d217feec05e09245af3d7555563945d7263d323b349d108f29b03c8b02088f18b8d0a86aaa3f828118fff413693be5227c66aa62f51de1d9e17d2892dc4be61aa352375178eb7f36aefabc5f69da01ce9fc1d6b17cdf5b23ee5ffb0c5bd0e04182edbe2c0e52f8d9d3fdbcc720c16a1647813bac9b1b466638c3906f8dca1e3211ed607049c02a483768d9afc07849ad6d35cb15d6f9c1de83c2eeeb881f4fed0bf07100d193b1faffb54839417195de9b81d12f3ee") => {
   const result = await userService.createUser(
-    inputFirstName,
-    inputLastName,
+    inputName,
     inputUsername,
     inputEmail,
     inputPassword
   );
   expect(mockUserModel.create).toHaveBeenCalled();
-  expect(result.firstName).toBe(inputFirstName);
-  expect(result.lastName).toBe(inputLastName);
+  expect(result.name).toBe(inputName);
   expect(result.username).toBe(inputUsername);
   expect(result.email).toBe(inputEmail);
 });
 
 // =============
 // Test 3 - Test update User success
-test("should return object with firstName = (inputFirstName) if updated", async (inputUserId = 1, inputFirstName = "FirstName", inputLastName = "LastName", inputUsername = "Username", inputEmail = "test@testemail.com") => {
+test("should return object with name = (inputName) if updated", async (inputUserId = 1, inputName = "Name", inputUsername = "Username", inputEmail = "test@testemail.com") => {
   const result = await userService.updateUser(
     inputUserId,
-    inputFirstName,
-    inputLastName,
+    inputName,
     inputUsername,
     inputEmail
   );
   expect(mockUserModel.update).toHaveBeenCalled();
   expect(result.userId).toBe(inputUserId);
-  expect(result.firstName).toBe(inputFirstName);
-  expect(result.lastName).toBe(inputLastName);
+  expect(result.name).toBe(inputName);
   expect(result.username).toBe(inputUsername);
   expect(result.email).toBe(inputEmail);
 });

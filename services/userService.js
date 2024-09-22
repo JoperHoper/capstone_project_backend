@@ -7,10 +7,9 @@ const jsonWebToken = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const BoardService = require("../services/boardService.js");
 
-const createUser = async (firstName, lastName, username, email, password) => {
+const createUser = async (name, username, email, password) => {
   // Ensure valid input parameters
-  if (!Commons.isString(firstName)) return null;
-  if (!Commons.isString(lastName)) return null;
+  if (!Commons.isString(name)) return null;
   if (!Commons.isString(username)) return null;
   if (!Commons.isString(email)) return null;
   if (!Commons.isString(password)) return null;
@@ -57,10 +56,10 @@ const createUser = async (firstName, lastName, username, email, password) => {
     // Call corresponding SQL query
     let createdUser = await UserModel.create(
       {
-        firstName: firstName,
-        lastName: lastName,
+        name: name,
         username: username,
         email: email,
+        dob: new Date("9999-12-31"),
         salt: userAccountSalt,
         password: hashedPassword,
         createdAt: Date.now(),
@@ -143,18 +142,20 @@ const generateAccessToken = (username, userId) => {
 
 const updateUser = async (
   userId,
-  firstName = "",
-  lastName = "",
+  name = "",
   username = "",
   email = "",
+  bio = "",
+  dateOfBirth = null,
   newPassword = ""
 ) => {
   // Ensure valid input parameters
   if (!Number.isInteger(userId)) return null;
-  if (!Commons.isString(firstName)) return null;
-  if (!Commons.isString(lastName)) return null;
+  if (!Commons.isString(name)) return null;
   if (!Commons.isString(username)) return null;
   if (!Commons.isString(email)) return null;
+  if (!Commons.isString(bio)) return null;
+  if (dateOfBirth != null && !Commons.isDate(dateOfBirth)) return null;
   if (!Commons.isString(newPassword)) return null;
 
   // Ensure there is existing user before updating it
@@ -165,10 +166,12 @@ const updateUser = async (
   }
 
   // Process input parameters and replace existing data if necessary
-  if (firstName.length > 0) existingUser.firstName = firstName;
-  if (lastName.length > 0) existingUser.lastName = lastName;
+  if (name.length > 0) existingUser.name = name;
   if (username.length > 0) existingUser.username = username;
   if (email.length > 0) existingUser.email = email;
+  if (bio.length > 0) existingUser.bio = bio;
+  if (dateOfBirth != null) existingMovie.dob = dateOfBirth;
+
   if (newPassword.length > 0) {
     // Retrieve private key file contents to use for decryption of new password
     const forgePrivateKey = await Commons.getForgePrivateKey();
@@ -205,10 +208,11 @@ const updateUser = async (
     // Call corresponding SQL query
     let result = await UserModel.update(
       {
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
+        name: existingUser.name,
         username: existingUser.username,
         email: existingUser.email,
+        bio: existingUser.bio,
+        dateOfBirth: existingUser.dob,
         password: existingUser.password,
         updatedAt: Date.now(),
       },
@@ -243,6 +247,7 @@ const getUserById = async (userId) => {
 
   // Return result back to caller
   if (retrievedUser) {
+    console.log("here");
     return retrievedUser;
   } else {
     return null;
@@ -270,8 +275,7 @@ const getAllUsers = async () => {
   // Call corresponding SQL query
   let retrievedUsers = await UserModel.findAll({
     attributes: [
-      "firstName",
-      "lastName",
+      "name",
       "username",
       "email",
       "password",

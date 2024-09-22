@@ -11,27 +11,23 @@ afterEach(() => {
 jest.mock("../../services/userService.js", () => ({
   createUser: jest.fn().mockResolvedValue({
     userId: 1,
-    firstName: "Some",
-    lastName: "User",
+    name: "Some User",
     email: "test@testmail.com",
   }),
   updateUser: jest.fn().mockResolvedValue({
     userId: 1,
-    firstName: "Some",
-    lastName: "User",
+    name: "Some User",
     email: "test@testmail.com",
   }),
   getUserById: jest.fn().mockResolvedValue({
     userId: 1,
-    firstName: "Some",
-    lastName: "User",
+    name: "Some User",
     email: "test@testmail.com",
   }),
   getAllUsers: jest.fn().mockResolvedValue([
     {
       userId: 1,
-      firstName: "Some",
-      lastName: "User",
+      name: "Some User",
       email: "test@testmail.com",
     },
   ]),
@@ -57,18 +53,16 @@ test("should return response object with userId = (req.body.userId) if retrieved
   expect(res.result.status).toBe("success");
   expect(res.result.message).toBe("User (1) retrieved successfully.");
   expect(res.result.data.userId).toBe(1);
-  expect(res.result.data.firstName).toBe("Some");
-  expect(res.result.data.lastName).toBe("User");
+  expect(res.result.data.name).toBe("Some User");
   expect(mockUserService.getUserById).toHaveBeenCalled();
 });
 
 // =============
 // Test 2 - Test create new User success
-test("should return response object with firstName = (req.body.firstName) if saved", async () => {
+test("should return response object with name = (req.body.name) if saved", async () => {
   req = {
     body: {
-      firstName: "Some",
-      lastName: "User",
+      name: "Some User",
       username: "username",
       email: "test@testmail.com",
       password:
@@ -88,8 +82,7 @@ test("should return response object with firstName = (req.body.firstName) if sav
   expect(res.result.status).toBe("success");
   expect(res.result.message).toBe("User created successfully.");
   expect(res.result.data.userId).toBe(1);
-  expect(res.result.data.firstName).toBe("Some");
-  expect(res.result.data.lastName).toBe("User");
+  expect(res.result.data.name).toBe("Some User");
   expect(res.result.data.email).toBe("test@testmail.com");
   expect(mockUserService.createUser).toHaveBeenCalled();
 });
@@ -100,8 +93,7 @@ test("should return response object with userId = (req.body.userId) if updated",
   req = {
     body: {
       userId: 1,
-      firstName: "Some",
-      lastName: "User",
+      name: "Some User",
       email: "test@testmail.com",
     },
   };
@@ -118,8 +110,7 @@ test("should return response object with userId = (req.body.userId) if updated",
   expect(res.result.status).toBe("success");
   expect(res.result.message).toBe("User (1) updated successfully.");
   expect(res.result.data.userId).toBe(1);
-  expect(res.result.data.firstName).toBe("Some");
-  expect(res.result.data.lastName).toBe("User");
+  expect(res.result.data.name).toBe("Some User");
   expect(res.result.data.email).toBe("test@testmail.com");
   expect(mockUserService.updateUser).toHaveBeenCalled();
 });

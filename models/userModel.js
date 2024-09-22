@@ -13,12 +13,7 @@ UserModel.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      required: true,
-    },
-    lastName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       required: true,
@@ -33,6 +28,16 @@ UserModel.init(
       allowNull: false,
       required: true,
     },
+    bio: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      required: false,
+    },
+    dob: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      required: true,
+    },
     salt: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -42,11 +47,6 @@ UserModel.init(
       type: DataTypes.STRING,
       allowNull: false,
       required: true,
-    },
-    token: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      required: false,
     },
     createdAt: {
       type: DataTypes.DATE,
