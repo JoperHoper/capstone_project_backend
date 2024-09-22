@@ -42,10 +42,7 @@ const authenticateToken = async (req, res) => {
   // Accepted JWT must be in the format of "XXX actual_token_here"
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
-    res.status(401).send({
-      status: Constants.ERROR,
-      message: "Invalid authentication token entered",
-    });
+    res.sendStatus(401);
     return false;
   }
 
@@ -59,10 +56,7 @@ const authenticateToken = async (req, res) => {
     (err, user) => {
       if (err) {
         console.log(err);
-        res.status(403).send({
-          status: Constants.ERROR,
-          message: "Error during authentication - " + err.message,
-        });
+        res.sendStatus(403);
         return false;
       }
       console.log(user);
