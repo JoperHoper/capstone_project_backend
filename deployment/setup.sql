@@ -57,7 +57,7 @@ CREATE TABLE `boards` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`boardId`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE `boards` (
 
 LOCK TABLES `boards` WRITE;
 /*!40000 ALTER TABLE `boards` DISABLE KEYS */;
-INSERT INTO `boards` VALUES (1,'My Avoid List',1,'2024-09-06 14:29:47','2024-09-06 14:41:05');
+INSERT INTO `boards` VALUES (1,'My Avoid List',1,'2024-09-06 14:29:47','2024-09-06 14:41:05'),(2,'My To-Watch List',1,'2024-09-17 14:07:39','2024-09-17 14:07:39'),(3,'Default',4,'2024-09-17 14:20:36','2024-09-17 14:20:36'),(4,'Default',1,'2024-09-17 14:20:36',NULL),(5,'Default',2,'2024-09-17 14:20:36',NULL),(6,'Default',3,'2024-09-17 14:20:36',NULL),(7,'Default',5,'2024-09-22 06:24:19','2024-09-22 06:24:19'),(8,'Default',1,'2024-09-22 09:23:06','2024-09-22 09:23:06');
 /*!40000 ALTER TABLE `boards` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,7 +110,7 @@ CREATE TABLE `favourites` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`favouriteId`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,7 +119,7 @@ CREATE TABLE `favourites` (
 
 LOCK TABLES `favourites` WRITE;
 /*!40000 ALTER TABLE `favourites` DISABLE KEYS */;
-INSERT INTO `favourites` VALUES (1,1,2,'2024-08-31 12:46:26','2024-09-06 15:10:38'),(2,1,1,'2024-09-03 14:27:59','2024-09-03 14:27:59');
+INSERT INTO `favourites` VALUES (1,1,2,'2024-08-31 12:46:26','2024-09-06 15:10:38'),(2,1,1,'2024-09-03 14:27:59','2024-09-03 14:27:59'),(3,1,1,'2024-09-16 12:38:08','2024-09-16 12:38:08'),(4,1,1,'2024-09-16 12:56:19','2024-09-16 12:56:19'),(5,1,1,'2024-09-17 14:05:20','2024-09-17 14:05:20'),(17,3,2,'2024-09-18 14:18:12','2024-09-18 14:18:12'),(18,5,15,'2024-09-22 06:24:53','2024-09-22 06:24:53'),(19,5,9,'2024-09-22 06:24:55','2024-09-22 06:24:55');
 /*!40000 ALTER TABLE `favourites` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -195,7 +195,7 @@ CREATE TABLE `rs_board_favourite` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`boardFavouriteId`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -204,7 +204,7 @@ CREATE TABLE `rs_board_favourite` (
 
 LOCK TABLES `rs_board_favourite` WRITE;
 /*!40000 ALTER TABLE `rs_board_favourite` DISABLE KEYS */;
-INSERT INTO `rs_board_favourite` VALUES (1,1,1,'2024-09-06 14:45:40','2024-09-06 15:07:18');
+INSERT INTO `rs_board_favourite` VALUES (1,1,1,'2024-09-06 14:45:40','2024-09-06 15:07:18'),(2,6,14,'2024-09-18 13:47:43','2024-09-18 13:47:43'),(4,6,17,'2024-09-18 14:18:12','2024-09-18 14:18:12'),(5,7,18,'2024-09-22 06:24:53','2024-09-22 06:24:53'),(6,7,19,'2024-09-22 06:24:55','2024-09-22 06:24:55');
 /*!40000 ALTER TABLE `rs_board_favourite` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -324,13 +324,13 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `userId` int NOT NULL AUTO_INCREMENT,
-  `firstName` varchar(255) NOT NULL,
-  `lastName` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
+  `bio` varchar(50) DEFAULT NULL,
+  `dob` datetime NOT NULL,
   `salt` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `token` varchar(255) DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`userId`)
@@ -343,7 +343,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Johnny','Doe','johnny.doe','johnny.doe@testemail.com','$2b$10$M9ce4proZbRmIZEkTNwGoe','$2b$10$M9ce4proZbRmIZEkTNwGoeOB.TZj8Qf6LsSkcV.t4uZwH1OtcaeO2',NULL,'2024-09-14 07:51:58','2024-09-14 07:51:58');
+INSERT INTO `users` VALUES (1,'Johnny Doe','johnny.doe','johnny.doe@testemail.com','Testing 123','9999-12-31 00:00:00','$2b$10$LWKRN8rJp0cCjIV4R81dte','$2b$10$LWKRN8rJp0cCjIV4R81dteL1itBuzk8T6RX0ZCGgTpUGcYyzQboZW','2024-09-22 09:23:06','2024-09-22 09:36:31');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -356,4 +356,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-15 22:40:49
+-- Dump completed on 2024-09-22 17:41:43
