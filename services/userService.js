@@ -170,7 +170,7 @@ const updateUser = async (
   if (username.length > 0) existingUser.username = username;
   if (email.length > 0) existingUser.email = email;
   if (bio.length > 0) existingUser.bio = bio;
-  if (dateOfBirth != null) existingMovie.dob = dateOfBirth;
+  if (dateOfBirth != null) existingUser.dob = dateOfBirth;
 
   if (newPassword.length > 0) {
     // Retrieve private key file contents to use for decryption of new password
