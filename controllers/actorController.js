@@ -111,9 +111,9 @@ const updateActor = async (req, res) => {
 
 const getActorById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.actorId) {
+      if (!req.body.actorId && !req.query.actorId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"actorId" is not found in request.',
@@ -122,7 +122,9 @@ const getActorById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const actorId = req.body.actorId;
+      const actorId = req.query.actorId
+        ? parseInt(req.query.actorId)
+        : parseInt(req.body.actorId);
 
       // Call corresponding service method
       let result = await ActorService.getActorById(actorId);

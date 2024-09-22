@@ -119,9 +119,9 @@ const updateMovieDirector = async (req, res) => {
 
 const getMovieDirectorById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.movieDirectorId) {
+      if (!req.body.movieDirectorId && !req.query.movieDirectorId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"movieDirectorId" is not found in request.',
@@ -130,7 +130,9 @@ const getMovieDirectorById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = req.body.movieDirectorId;
+      const movieDirectorId = erq.query.movieDirectorId
+        ? parseInt(req.query.movieDirectorId)
+        : parseInt(req.body.movieDirectorId);
 
       // Call corresponding service method
       let result = await MovieDirectorService.getMovieDirectorById(

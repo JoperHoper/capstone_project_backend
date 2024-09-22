@@ -115,9 +115,9 @@ const updateMovieGenre = async (req, res) => {
 
 const getMovieGenreById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.movieGenreId) {
+      if (!req.body.movieGenreId && !req.query.movieGenreId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"movieGenreId" is not found in request.',
@@ -126,7 +126,9 @@ const getMovieGenreById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const movieGenreId = req.body.movieGenreId;
+      const movieGenreId = req.query.movieGenreId
+        ? parseInt(req.query.movieGenreId)
+        : parseInt(req.body.movieGenreId);
 
       // Call corresponding service method
       let result = await MovieGenreService.getMovieGenreById(movieGenreId);

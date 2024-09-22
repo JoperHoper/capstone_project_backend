@@ -111,9 +111,9 @@ const updateBoard = async (req, res) => {
 
 const getBoardById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.boardId) {
+      if (!req.body.boardId && !req.query.boardId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"boardId" is not found in request.',
@@ -122,7 +122,9 @@ const getBoardById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const boardId = req.body.boardId;
+      const boardId = req.query.boardId
+        ? parseInt(req.query.boardId)
+        : parseInt(req.body.boardId);
 
       // Call corresponding service method
       let result = await BoardService.getBoardById(boardId);
