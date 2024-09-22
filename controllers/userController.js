@@ -152,13 +152,12 @@ const updateUser = async (req, res) => {
       const bio = req.body.bio ? req.body.bio : "";
       const password = req.body.password ? req.body.password : "";
       let dateOfBirth = null;
-      if (req.body.dateOfBirth) {
-        dateOfBirth = new Date(req.body.dateOfBirth);
+      if (req.body.dob) {
+        dateOfBirth = new Date(req.body.dob);
         if (!Commons.isDate(dateOfBirth)) {
           res.status(400).send({
             status: Constants.FAILED,
-            message:
-              '"dateOfBirth" (' + req.body.dateOfBirth + ") format is invalid.",
+            message: '"dateOfBirth" (' + req.body.dob + ") format is invalid.",
           });
           return;
         }
