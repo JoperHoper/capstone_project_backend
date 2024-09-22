@@ -224,23 +224,8 @@ const getUserById = async (req, res) => {
   }
   if (req) {
     if (req.body) {
-      // Validate request body parameters
-      if (!req.body.userId) {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: '"userId" is not found in request.',
-        });
-        return;
-      }
-
       // Extract and process body parameters from request
-      const userId = req.body.userId;
-
-      // Ensure that only the user can retrieve their own data
-      if (req?.user?.userId && req.user.userId != userId) {
-        res.status(403).send();
-        return;
-      }
+      const userId = req.user?.userId;
 
       // Call corresponding service method
       let result = await UserService.getUserById(userId);
