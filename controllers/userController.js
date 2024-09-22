@@ -41,6 +41,28 @@ const createUser = async (req, res) => {
       const email = req.body.email;
       const password = req.body.password;
 
+      let existingUserList = await UserService.getAllUsers("", username, email);
+      if (existingUserList && existingUserList.length > 0) {
+        for (let i = 0; i < existingUserList.length; i++) {
+          if (existingUserList[i].username == username) {
+            console.log("Username (" + username + ") already exists.");
+            res.status(200).send({
+              status: Constants.FAILED,
+              message: "Username (" + username + ") already exists.",
+            });
+            return;
+          } else if (existingUserList[i].email === email) {
+            console.log("Email (" + email + ") already exists.");
+            res.status(200).send({
+              status: Constants.FAILED,
+              message: "Email (" + email + ") already exists.",
+            });
+            return;
+          }
+        }
+        return;
+      }
+
       // Call corresponding service method
       let result = await UserService.createUser(
         name,
