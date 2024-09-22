@@ -3,7 +3,8 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createBoard = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {
@@ -158,7 +159,8 @@ const getBoardById = async (req, res) => {
 };
 
 const getAllBoards = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {

@@ -35,7 +35,7 @@ const getForgePrivateKey = async () => {
   return forgePrivateKey;
 };
 
-const authenticateToken = (req, res) => {
+const authenticateToken = async (req, res) => {
   // Retrieve Json Web Token (JWT) from the request headers
   const authHeader = req.headers["authorization"];
 
@@ -53,7 +53,7 @@ const authenticateToken = (req, res) => {
   dotenv.config();
 
   // Verify JWT, and if successful, populate user information into the request
-  jsonWebToken.verify(
+  let isVerifyJWTSuccessful = await jsonWebToken.verify(
     token,
     process.env.TOKEN_SECRET.toString(),
     (err, user) => {
@@ -67,9 +67,10 @@ const authenticateToken = (req, res) => {
       }
       console.log(user);
       req.user = user;
+      return true;
     }
   );
-  return true;
+  return isVerifyJWTSuccessful;
 };
 
 module.exports = {

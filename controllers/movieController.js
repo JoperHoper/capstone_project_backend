@@ -3,7 +3,8 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createMovie = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {
@@ -119,7 +120,8 @@ const createMovie = async (req, res) => {
 };
 
 const updateMovie = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {
@@ -329,7 +331,8 @@ const getAllMovies = async (req, res) => {
 };
 
 const deleteMovieById = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {

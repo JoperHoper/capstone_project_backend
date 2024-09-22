@@ -147,7 +147,8 @@ const login = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {
@@ -217,7 +218,8 @@ const updateUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  if (!Commons.authenticateToken(req, res)) {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
     return;
   }
   if (req) {
