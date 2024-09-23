@@ -130,7 +130,7 @@ const getMovieDirectorById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const movieDirectorId = erq.query.movieDirectorId
+      const movieDirectorId = req.query?.movieDirectorId
         ? parseInt(req.query.movieDirectorId)
         : parseInt(req.body.movieDirectorId);
 

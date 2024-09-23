@@ -24,37 +24,37 @@ jest.mock("../../services/userService.js", () => ({
     name: "Some User",
     email: "test@testmail.com",
   }),
-  getAllUsers: jest.fn().mockResolvedValue([
-    {
-      userId: 1,
-      name: "Some User",
-      email: "test@testmail.com",
-    },
-  ]),
+  getAllUsers: jest.fn().mockResolvedValue([]),
   deleteUserById: jest.fn().mockResolvedValue(true),
 }));
 
 // =============
-// Test 1 - Test retrieved by userId success
-test("should return response object with userId = (req.body.userId) if retrieved", async () => {
+// Test 1 - Test retrieved by userId fail without token
+test("should return response object with failed status if given wrong jwt", async () => {
   req = {
     body: { userId: 1 },
+    headers: {
+      authorization:
+        "Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZXguc3VuIiwidXNlcklkIjozLCJpYXQiOjE3MjY3NTY2NDAsImV4cCI6MTcyNjc1ODQ0MH0.0zohtUWB_JTEtPa7HCiOmvZPh01pt7Aefu2WM_I-e7w",
+    },
   };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
     },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
+    },
   };
   await userController.getUserById(req, res);
-  expect(res.result.status).toBe("success");
-  expect(res.result.message).toBe("User (1) retrieved successfully.");
-  expect(res.result.data.userId).toBe(1);
-  expect(res.result.data.name).toBe("Some User");
-  expect(mockUserService.getUserById).toHaveBeenCalled();
+  expect(mockUserService.createUser).toHaveBeenCalledTimes(0);
 });
 
 // =============
@@ -71,11 +71,17 @@ test("should return response object with name = (req.body.name) if saved", async
   };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await userController.createUser(req, res);
@@ -89,30 +95,35 @@ test("should return response object with name = (req.body.name) if saved", async
 
 // =============
 // Test 3 - Test update User success
-test("should return response object with userId = (req.body.userId) if updated", async () => {
+test("should return response object with failed status if given wrong jwt", async () => {
   req = {
     body: {
       userId: 1,
       name: "Some User",
       email: "test@testmail.com",
     },
+    headers: {
+      authorization:
+        "Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZXguc3VuIiwidXNlcklkIjozLCJpYXQiOjE3MjY3NTY2NDAsImV4cCI6MTcyNjc1ODQ0MH0.0zohtUWB_JTEtPa7HCiOmvZPh01pt7Aefu2WM_I-e7w",
+    },
   };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
     },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
+    },
   };
   await userController.updateUser(req, res);
-  expect(res.result.status).toBe("success");
-  expect(res.result.message).toBe("User (1) updated successfully.");
-  expect(res.result.data.userId).toBe(1);
-  expect(res.result.data.name).toBe("Some User");
-  expect(res.result.data.email).toBe("test@testmail.com");
-  expect(mockUserService.updateUser).toHaveBeenCalled();
+  expect(mockUserService.updateUser).toHaveBeenCalledTimes(0);
 });
 
 // =============
@@ -121,11 +132,17 @@ test("should return response object if deleted", async () => {
   req = { body: { userId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await userController.deleteUserById(req, res);

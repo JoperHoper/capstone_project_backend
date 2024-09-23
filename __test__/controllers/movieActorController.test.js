@@ -30,11 +30,17 @@ test("should return response object with movieActorId = (req.body.movieActorId) 
   req = { body: { movieActorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieActorController.getMovieActorById(req, res);
@@ -52,11 +58,17 @@ test("should return response object with movieId = (req.body.movieId) if saved",
   req = { body: { movieId: 1, actorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieActorController.createMovieActor(req, res);
@@ -74,11 +86,17 @@ test("should return response object with movieActorId = (req.body.movieActorId) 
   req = { body: { movieActorId: 1, userId: 1, movieId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieActorController.updateMovieActor(req, res);
@@ -96,11 +114,17 @@ test("should return delete status if deleted", async () => {
   req = { body: { movieActorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieActorController.deleteMovieActorById(req, res);

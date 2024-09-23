@@ -130,7 +130,7 @@ const getBoardFavouriteById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const boardFavouriteId = req.query.boardFavouriteId
+      const boardFavouriteId = req.query?.boardFavouriteId
         ? parseInt(req.query.boardFavouriteId)
         : parseInt(req.body.boardFavouriteId);
 

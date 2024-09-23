@@ -27,14 +27,20 @@ jest.mock("../../services/movieGenreService.js", () => ({
 // =============
 // Test 1 - Test retrieved by movieGenreId success
 test("should return response object with movieGenreId = (req.body.movieGenreId) if retrieved", async () => {
-  req = { body: { movieGenreId: 1 } };
+  req = { body: { movieGenreId: 1 }, query: { movieGenreId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieGenreController.getMovieGenreById(req, res);
@@ -52,11 +58,17 @@ test("should return response object with movieId = (req.body.movieId) if saved",
   req = { body: { movieId: 1, genreId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieGenreController.createMovieGenre(req, res);
@@ -74,11 +86,17 @@ test("should return response object with movieGenreId = (req.body.movieGenreId) 
   req = { body: { movieGenreId: 1, userId: 1, movieId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieGenreController.updateMovieGenre(req, res);
@@ -96,11 +114,17 @@ test("should return delete status if deleted", async () => {
   req = { body: { movieGenreId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieGenreController.deleteMovieGenreById(req, res);

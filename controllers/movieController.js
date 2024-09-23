@@ -212,7 +212,7 @@ const getMovieById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const movieId = req.query.movieId
+      const movieId = req.query?.movieId
         ? parseInt(req.query.movieId)
         : parseInt(req.body.movieId);
 

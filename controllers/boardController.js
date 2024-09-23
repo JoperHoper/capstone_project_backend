@@ -122,7 +122,7 @@ const getBoardById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const boardId = req.query.boardId
+      const boardId = req.query?.boardId
         ? parseInt(req.query.boardId)
         : parseInt(req.body.boardId);
 

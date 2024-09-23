@@ -122,7 +122,7 @@ const getActorById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const actorId = req.query.actorId
+      const actorId = req.query?.actorId
         ? parseInt(req.query.actorId)
         : parseInt(req.body.actorId);
 

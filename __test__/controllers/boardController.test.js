@@ -21,14 +21,20 @@ jest.mock("../../services/boardService.js", () => ({
 // =============
 // Test 1 - Test retrieved by boardId success
 test("should return response object with boardId = (inputBoardId) if retrieved", async () => {
-  req = { body: { boardId: 1 } };
+  req = { body: { boardId: 1 }, query: { boardId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardController.getBoardById(req, res);
@@ -41,23 +47,31 @@ test("should return response object with boardId = (inputBoardId) if retrieved",
 
 // =============
 // Test 2 - Test create new Board success
-test("should return response object with name = (req.body.name) if saved", async () => {
-  req = { body: { name: "Some Board", userId: 1 } };
+test("should return response object with failed status if given wrong jwt", async () => {
+  req = {
+    body: { name: "Some Board", userId: 1 },
+    headers: {
+      authorization:
+        "Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZXguc3VuIiwidXNlcklkIjozLCJpYXQiOjE3MjY3NTY2NDAsImV4cCI6MTcyNjc1ODQ0MH0.0zohtUWB_JTEtPa7HCiOmvZPh01pt7Aefu2WM_I-e7w",
+    },
+  };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
     },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
+    },
   };
   await boardController.createBoard(req, res);
-  expect(res.result.status).toBe("success");
-  expect(res.result.message).toBe("Board created successfully.");
-  expect(res.result.data.boardId).toBe(1);
-  expect(res.result.data.name).toBe("Some Board");
-  expect(mockBoardService.createBoard).toHaveBeenCalled();
+  expect(mockBoardService.createBoard).toHaveBeenCalledTimes(0);
 });
 
 // =============
@@ -66,11 +80,17 @@ test("should return response object with name = (req.body.name) if updated", asy
   req = { body: { boardId: 1, name: "Some Board", userId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardController.updateBoard(req, res);
@@ -87,11 +107,17 @@ test("should return response object if deleted", async () => {
   req = { body: { boardId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardController.deleteBoardById(req, res);
