@@ -27,14 +27,20 @@ jest.mock("../../services/movieDirectorService.js", () => ({
 // =============
 // Test 1 - Test retrieved by movieDirectorId success
 test("should return response object with movieDirectorId = (req.body.movieDirectorId) if retrieved", async () => {
-  req = { body: { movieDirectorId: 1 } };
+  req = { body: { movieDirectorId: 1 }, query: { movieDirectorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieDirectorController.getMovieDirectorById(req, res);
@@ -52,11 +58,17 @@ test("should return response object with movieId = (req.body.movieId) if saved",
   req = { body: { movieId: 1, directorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieDirectorController.createMovieDirector(req, res);
@@ -74,11 +86,17 @@ test("should return response object with movieDirectorId = (req.body.movieDirect
   req = { body: { movieDirectorId: 1, userId: 1, movieId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieDirectorController.updateMovieDirector(req, res);
@@ -96,11 +114,17 @@ test("should return delete status if deleted", async () => {
   req = { body: { movieDirectorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieDirectorController.deleteMovieDirectorById(req, res);

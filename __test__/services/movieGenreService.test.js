@@ -1,12 +1,13 @@
 const movieGenreService = require("../../services/movieGenreService.js");
 const mockMovieGenreModel = require("../../models/movieGenreModel.js");
+const mockMovieService = require("../../services/movieService.js");
 
 // Test settings
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-// Attempt to replaced the movieGenreModel.js in movieGenreService with this "fake" object
+// Attempt to replace the movieGenreModel.js in movieGenreService with this "fake" object
 jest.mock("../../models/movieGenreModel.js", () => ({
   sequelize: {
     transaction: jest.fn().mockResolvedValue({
@@ -22,6 +23,10 @@ jest.mock("../../models/movieGenreModel.js", () => ({
   update: jest
     .fn()
     .mockResolvedValue([{ movieGenreId: 1, movieId: 1, genreId: 1 }]),
+}));
+
+jest.mock("../../services/movieService.js", () => ({
+  getMovieById: jest.fn().mockResolvedValue({ movieId: 1 }),
 }));
 
 // =============

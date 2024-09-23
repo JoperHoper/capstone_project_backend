@@ -27,14 +27,20 @@ jest.mock("../../services/boardFavouriteService.js", () => ({
 // =============
 // Test 1 - Test retrieved by boardFavouriteId success
 test("should return response object with boardFavouriteId = (req.body.boardFavouriteId) if retrieved", async () => {
-  req = { body: { boardFavouriteId: 1 } };
+  req = { body: { boardFavouriteId: 1 }, query: { boardFavouriteId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardFavouriteController.getBoardFavouriteById(req, res);
@@ -52,11 +58,17 @@ test("should return response object with boardId = (req.body.boardId) if saved",
   req = { body: { boardId: 1, favouriteId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardFavouriteController.createBoardFavourite(req, res);
@@ -74,11 +86,17 @@ test("should return response object with boardFavouriteId = (req.body.boardFavou
   req = { body: { boardFavouriteId: 1, userId: 1, boardId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardFavouriteController.updateBoardFavourite(req, res);
@@ -96,11 +114,17 @@ test("should return delete status if deleted", async () => {
   req = { body: { boardFavouriteId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await boardFavouriteController.deleteBoardFavouriteById(req, res);

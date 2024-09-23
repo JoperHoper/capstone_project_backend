@@ -145,9 +145,11 @@ const getFavouriteById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const favouriteId = req.query.favouriteId
+      const favouriteId = req.query?.favouriteId
         ? parseInt(req.query.favouriteId)
         : parseInt(req.body.favouriteId);
+
+      console.log("favouriteId: " + favouriteId);
 
       // Call corresponding service method
       let result = await FavouriteService.getFavouriteById(favouriteId);

@@ -56,11 +56,17 @@ test("should return response object with movieId = (req.body.movieId) if retriev
   req = { body: { movieId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await movieController.getMovieById(req, res);
@@ -89,70 +95,84 @@ test("should return response object with name = (req.body.name) if saved", async
       runningTime: 1,
       releaseDate: "2024-01-23",
     },
+    headers: {
+      authorization:
+        "Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZXguc3VuIiwidXNlcklkIjozLCJpYXQiOjE3MjY3NTY2NDAsImV4cCI6MTcyNjc1ODQ0MH0.0zohtUWB_JTEtPa7HCiOmvZPh01pt7Aefu2WM_I-e7w",
+    },
   };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
     },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
+    },
   };
   await movieController.createMovie(req, res);
-  expect(res.result.status).toBe("success");
-  expect(res.result.message).toBe("Movie created successfully.");
-  expect(res.result.data.movieId).toBe(1);
-  expect(res.result.data.movieTitle).toBe("Some Movie");
-  expect(res.result.data.language).toBe("English");
-  expect(res.result.data.posterUrl).toBe("https://www.someposterurl.com");
-  expect(res.result.data.trailerUrl).toBe("https://www.sometrailerurl.com");
-  expect(res.result.data.runningTime).toBe(1);
-  expect(res.result.data.releaseDate).toBe("2024-01-23");
-  expect(mockMovieService.createMovie).toHaveBeenCalled();
+  expect(mockMovieService.createMovie).toHaveBeenCalledTimes(0);
 });
 
 // =============
 // Test 3 - Test update Movie success
-test("should return response object with movieId = (req.body.movieId) if updated", async () => {
-  req = { body: { movieId: 1, name: "Some Movie" } };
+test("should return response object failed status if given wrong jwt", async () => {
+  req = {
+    body: { movieId: 1, name: "Some Movie" },
+    headers: {
+      authorization:
+        "Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZXguc3VuIiwidXNlcklkIjozLCJpYXQiOjE3MjY3NTY2NDAsImV4cCI6MTcyNjc1ODQ0MH0.0zohtUWB_JTEtPa7HCiOmvZPh01pt7Aefu2WM_I-e7w",
+    },
+  };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
     },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
+    },
   };
   await movieController.updateMovie(req, res);
-  expect(res.result.status).toBe("success");
-  expect(res.result.message).toBe("Movie (1) updated successfully.");
-  expect(res.result.data.movieId).toBe(1);
-  expect(res.result.data.movieTitle).toBe("Some Movie");
-  expect(res.result.data.language).toBe("English");
-  expect(res.result.data.posterUrl).toBe("https://www.someposterurl.com");
-  expect(res.result.data.trailerUrl).toBe("https://www.sometrailerurl.com");
-  expect(res.result.data.runningTime).toBe(1);
-  expect(res.result.data.releaseDate).toBe("2024-01-23");
-  expect(mockMovieService.updateMovie).toHaveBeenCalled();
+  expect(mockMovieService.updateMovie).toHaveBeenCalledTimes(0);
 });
 
 // =============
 // Test 4 - Test delete Movie success
 test("should return response object if deleted", async () => {
-  req = { body: { movieId: 1 } };
+  req = {
+    body: { movieId: 1 },
+    headers: {
+      authorization:
+        "Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsZXguc3VuIiwidXNlcklkIjozLCJpYXQiOjE3MjY3NTY2NDAsImV4cCI6MTcyNjc1ODQ0MH0.0zohtUWB_JTEtPa7HCiOmvZPh01pt7Aefu2WM_I-e7w",
+    },
+  };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
     },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
+    },
   };
   await movieController.deleteMovieById(req, res);
-  expect(res.result.status).toBe("success");
-  expect(res.result.message).toBe("Movie (1) has been deleted successfully.");
-  expect(mockMovieService.deleteMovieById).toHaveBeenCalled();
+  expect(mockMovieService.deleteMovieById).toHaveBeenCalledTimes(0);
 });

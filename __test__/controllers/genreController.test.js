@@ -23,14 +23,20 @@ jest.mock("../../services/genreService.js", () => ({
 // =============
 // Test 1 - Test retrieved by genreId success
 test("should return response object with genreId = (req.body.genreId) if retrieved", async () => {
-  req = { body: { genreId: 1 } };
+  req = { body: { genreId: 1 }, query: { genreId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await genreController.getGenreById(req, res);
@@ -47,11 +53,17 @@ test("should return response object with genre = (req.body.genre) if saved", asy
   req = { body: { genre: "Some Genre" } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await genreController.createGenre(req, res);
@@ -68,11 +80,17 @@ test("should return response object with genre = (req.body.genre) if updated", a
   req = { body: { genreId: 1, genre: "Some Genre" } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await genreController.updateGenre(req, res);
@@ -89,11 +107,17 @@ test("should return response object if deleted", async () => {
   req = { body: { genreId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await genreController.deleteGenreById(req, res);

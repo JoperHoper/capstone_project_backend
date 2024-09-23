@@ -27,14 +27,20 @@ jest.mock("../../services/directorService.js", () => ({
 // =============
 // Test 1 - Test retrieved by directorId success
 test("should return response object with directorId = (req.body.directorId) if retrieved", async () => {
-  req = { body: { directorId: 1 } };
+  req = { body: { directorId: 1 }, query: { directorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await directorController.getDirectorById(req, res);
@@ -51,11 +57,17 @@ test("should return response object with name = (req.body.name) if saved", async
   req = { body: { name: "Some Director" } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await directorController.createDirector(req, res);
@@ -72,11 +84,17 @@ test("should return response object with name = (req.body.name) if updated", asy
   req = { body: { directorId: 1, name: "Some Director" } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await directorController.updateDirector(req, res);
@@ -93,11 +111,17 @@ test("should return response object if deleted", async () => {
   req = { body: { directorId: 1 } };
   res = {
     result: {},
-    status: (statusCode) => {
+    statusCode: -1,
+    status: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
       return res;
     },
     send: (result) => {
       res.result = result;
+    },
+    sendStatus: (inputStatusCode) => {
+      res.statusCode = inputStatusCode;
+      return res;
     },
   };
   await directorController.deleteDirectorById(req, res);

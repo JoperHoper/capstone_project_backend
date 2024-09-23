@@ -104,7 +104,7 @@ const getDirectorById = async (req, res) => {
   if (req) {
     if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.directorId && !req.query.directorId) {
+      if (!req.body.directorId || !req.query.directorId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"directorId" is not found in request.',
@@ -113,7 +113,7 @@ const getDirectorById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const directorId = req.query.directorId
+      const directorId = req.query?.directorId
         ? parseInt(req.query.directorId)
         : parseInt(req.body.directorId);
 

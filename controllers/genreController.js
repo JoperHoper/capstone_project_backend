@@ -113,7 +113,7 @@ const getGenreById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const genreId = req.query.genreId
+      const genreId = req.query?.genreId
         ? parseInt(req.query.genreId)
         : parseInt(req.body.genreId);
 
