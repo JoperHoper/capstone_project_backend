@@ -13,12 +13,7 @@ UserModel.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      required: true,
-    },
-    lastName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       required: true,
@@ -30,6 +25,16 @@ UserModel.init(
     },
     email: {
       type: DataTypes.STRING,
+      allowNull: false,
+      required: true,
+    },
+    bio: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      required: false,
+    },
+    dob: {
+      type: DataTypes.DATE,
       allowNull: false,
       required: true,
     },

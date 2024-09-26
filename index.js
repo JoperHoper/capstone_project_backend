@@ -1,11 +1,14 @@
 // Initialize the express app with configuration settings
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const app = express();
 const PORT = 8000;
 
 // Import nested routes
 const actorRouter = require("./routes/actorRoutes.js");
+const boardRouter = require("./routes/boardRoutes.js");
+const boardFavourite = require("./routes/boardFavouriteRoutes.js");
 const directorRouter = require("./routes/directorRoutes.js");
 const favouriteRouter = require("./routes/favouriteRoutes.js");
 const genreRouter = require("./routes/genreRoutes.js");
@@ -16,10 +19,13 @@ const movieGenreRouter = require("./routes/movieGenreRoutes.js");
 const userRouter = require("./routes/userRoutes.js");
 
 // Set up nested routes
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw());
 app.use(bodyParser.json());
 app.use("/actor", actorRouter);
+app.use("/board", boardRouter);
+app.use("/board_favourite", boardFavourite);
 app.use("/director", directorRouter);
 app.use("/favourite", favouriteRouter);
 app.use("/genre", genreRouter);

@@ -3,6 +3,10 @@ const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
 
 const createMovie = async (req, res) => {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -116,6 +120,10 @@ const createMovie = async (req, res) => {
 };
 
 const updateMovie = async (req, res) => {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters
@@ -193,9 +201,9 @@ const updateMovie = async (req, res) => {
 
 const getMovieById = async (req, res) => {
   if (req) {
-    if (req.body) {
+    if (req.body || req.query) {
       // Validate request body parameters
-      if (!req.body.movieId) {
+      if (!req.body.movieId && !req.query.movieId) {
         res.status(200).send({
           status: Constants.FAILED,
           message: '"movieId" is not found in request.',
@@ -204,7 +212,9 @@ const getMovieById = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const movieId = req.body.movieId;
+      const movieId = req.query?.movieId
+        ? parseInt(req.query.movieId)
+        : parseInt(req.body.movieId);
 
       // Call corresponding service method
       let result = await MovieService.getMovieById(movieId);
@@ -246,8 +256,12 @@ const getAllMovies = async (req, res) => {
       // Extract and process body parameters from request
       const movieTitle = req.body.movieTitle ? req.body.movieTitle : "";
       const language = req.body.language ? req.body.language : "";
-      const fromRunningTime = req.body.runningTime ? req.body.runningTime : -1;
-      const toRunningTime = req.body.runningTime ? req.body.runningTime : -1;
+      const fromRunningTime = req.body.fromRunningTime
+        ? req.body.fromRunningTime
+        : -1;
+      const toRunningTime = req.body.toRunningTime
+        ? req.body.toRunningTime
+        : -1;
       let fromReleaseDate = null;
       if (req.body.fromReleaseDate) {
         fromReleaseDate = new Date(req.body.fromReleaseDate);
@@ -319,6 +333,10 @@ const getAllMovies = async (req, res) => {
 };
 
 const deleteMovieById = async (req, res) => {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
+    return;
+  }
   if (req) {
     if (req.body) {
       // Validate request body parameters

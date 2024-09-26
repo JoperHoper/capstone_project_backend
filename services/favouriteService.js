@@ -1,7 +1,11 @@
+const { Op } = require("sequelize");
 const FavouriteModel = require("../models/favouriteModel.js");
+const BoardService = require("../services/boardService.js");
+const BoardFavouriteService = require("../services/boardFavouriteService.js");
 const MovieService = require("../services/movieService.js");
 const UserService = require("../services/userService.js");
 const Commons = require("../common/commons.js");
+const Constants = require("../common/constants.js");
 
 const createFavourite = async (userId, movieId) => {
   // Ensure valid input parameters
@@ -22,17 +26,64 @@ const createFavourite = async (userId, movieId) => {
     return null;
   }
 
-  // Call corresponding SQL query
-  let createdFavourite = await FavouriteModel.create({
-    userId: existingUser.userId,
-    movieId: existingMovie.movieId,
-    createdAt: Date.now(),
-  });
+  // Ensure that the user's movie to favourite is non-existent before adding it
+  let existingFavourite = await getAllFavourites(-1, userId, movieId);
+  if (existingFavourite) {
+    console.log(
+      "User (" + userId + ") has already favourite this movie (" + movieId + ")"
+    );
+    return null;
+  }
 
-  // Return result back to caller
-  if (createdFavourite) {
-    return createdFavourite;
-  } else {
+  // Retrieve existing board to determine whether to add to a default or a specific board
+  let userBoardList = await BoardService.getAllBoards(userId);
+  if (!userBoardList || userBoardList.length == 0) {
+    console.log("Board from userId (" + userId + ") not found.");
+    return null;
+  }
+
+  // For now, due to time constraint, we will only add to the default board
+  let defaultBoard = null;
+  for (let i = 0; i < userBoardList.length; i++) {
+    if (userBoardList[i].name == Constants.DEFAULT) {
+      defaultBoard = userBoardList[i];
+    }
+  }
+  if (!defaultBoard) {
+    console.log("Default board from userId (" + userId + ") not found.");
+    return null;
+  }
+
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
+
+  try {
+    // Call corresponding SQL query
+    let createdFavourite = await FavouriteModel.create(
+      {
+        userId: existingUser.userId,
+        movieId: existingMovie.movieId,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+
+    await BoardFavouriteService.createBoardFavourite(
+      defaultBoard.boardId,
+      createdFavourite.favouriteId
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdFavourite) {
+      return createdFavourite;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -78,23 +129,34 @@ const updateFavourite = async (favouriteId, userId = -1, movieId = -1) => {
     existingFavourite.movieId = existingMovie.movieId;
   }
 
-  // Call corresponding SQL query
-  let result = await FavouriteModel.update(
-    {
-      userId: existingFavourite.userId,
-      movieId: existingFavourite.movieId,
-      updatedAt: Date.now(),
-    },
-    { where: { favouriteId: favouriteId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingFavourite;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await FavouriteModel.update(
+      {
+        userId: existingFavourite.userId,
+        movieId: existingFavourite.movieId,
+        updatedAt: Date.now(),
+      },
+      { where: { favouriteId: favouriteId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingFavourite;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -134,9 +196,45 @@ const getFavouriteById = async (favouriteId) => {
   }
 };
 
-const getAllFavourites = async () => {
+const getAllFavourites = async (
+  favouriteId = -1,
+  userId = -1,
+  movieId = -1,
+  favouriteIdArray = []
+) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(userId)) return null;
+  if (!Number.isInteger(movieId)) return null;
+
+  // Craft filter condition
+  let whereCondition = {};
+  if (favouriteId != -1) {
+    whereCondition.favouriteId = favouriteId;
+  }
+  if (userId != -1) {
+    whereCondition.userId = userId;
+  }
+  if (movieId != -1) {
+    whereCondition.movieId = movieId;
+  }
+  if (favouriteIdArray.length > 0) {
+    whereCondition.favouriteId = { [Op.in]: favouriteIdArray };
+  }
+
   // Call corresponding SQL query
-  let retrievedFavourites = await FavouriteModel.findAll({});
+  let retrievedFavourites = await FavouriteModel.findAll({
+    where: whereCondition,
+  });
+
+  // Populate each favourite obj with its corresponding movie obj
+  for (let i = 0; i < retrievedFavourites.length; i++) {
+    let existingMovie = await MovieService.getMovieById(
+      retrievedFavourites[i].movieId
+    );
+    if (existingMovie) {
+      retrievedFavourites[i].movie = existingMovie;
+    }
+  }
 
   // Return result back to caller
   if (retrievedFavourites && retrievedFavourites.length > 0) {
@@ -148,17 +246,75 @@ const getAllFavourites = async () => {
 
 const deleteFavouriteById = async (favouriteId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(favouriteId)) return null;
+  if (!Number.isInteger(favouriteId)) return false;
 
-  // Call corresponding SQL query
-  let result = await FavouriteModel.destroy({
-    where: { favouriteId: favouriteId },
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await FavouriteModel.destroy({
+      where: { favouriteId: favouriteId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return false;
+  }
+};
+
+const deleteFavouriteByUserAndMovieId = async (userId = -1, movieId = -1) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(userId)) return false;
+  if (!Number.isInteger(movieId)) return false;
+
+  // Ensure that userId and movieId is input correctly
+  if (userId == -1) {
+    console.log("User (" + userId + ") not found.");
+    return null;
+  }
+  if (movieId == -1) {
+    console.log("Movie (" + movieId + ") not found.");
+    return null;
+  }
+
+  let existingFavouriteList = await getAllFavourites(-1, userId, movieId);
+  let existingFavourite = null;
+  if (existingFavouriteList != null) {
+    existingFavourite = existingFavouriteList[0];
+  }
+
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await FavouriteModel.sequelize.transaction();
+
+  try {
+    // Call corresponding SQL query
+    let result = await FavouriteModel.destroy({
+      where: { userId: userId, movieId: movieId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return existingFavourite;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };
@@ -169,4 +325,5 @@ module.exports = {
   getFavouriteById,
   getAllFavourites,
   deleteFavouriteById,
+  deleteFavouriteByUserAndMovieId,
 };

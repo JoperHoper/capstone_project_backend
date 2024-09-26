@@ -3,11 +3,13 @@ const forge = require("node-forge");
 const UserModel = require("../models/userModel.js");
 const Constants = require("../common/constants.js");
 const Commons = require("../common/commons.js");
+const jsonWebToken = require("jsonwebtoken");
+const dotenv = require("dotenv");
+const BoardService = require("../services/boardService.js");
 
-const createUser = async (firstName, lastName, username, email, password) => {
+const createUser = async (name, username, email, password) => {
   // Ensure valid input parameters
-  if (!Commons.isString(firstName)) return null;
-  if (!Commons.isString(lastName)) return null;
+  if (!Commons.isString(name)) return null;
   if (!Commons.isString(username)) return null;
   if (!Commons.isString(email)) return null;
   if (!Commons.isString(password)) return null;
@@ -17,7 +19,13 @@ const createUser = async (firstName, lastName, username, email, password) => {
 
   // Decrypt password received from front-end page
   let passwordInBytes = forge.util.hexToBytes(password);
-  const decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  let decryptedPassword = "";
+  try {
+    decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 
   // Generate salt for this User account to store into DB
   const saltRounds = 10;
@@ -41,21 +49,38 @@ const createUser = async (firstName, lastName, username, email, password) => {
     return null;
   }
 
-  // Call corresponding SQL query
-  let createdUser = await UserModel.create({
-    firstName: firstName,
-    lastName: lastName,
-    username: username,
-    email: email,
-    salt: userAccountSalt,
-    password: hashedPassword,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await UserModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdUser) {
-    return createdUser;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdUser = await UserModel.create(
+      {
+        name: name,
+        username: username,
+        email: email,
+        dob: new Date("9999-12-31"),
+        salt: userAccountSalt,
+        password: hashedPassword,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+
+    // Create a default board upon user creation
+    await BoardService.createBoard(Constants.DEFAULT, createdUser.userId);
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdUser) {
+      return createdUser;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -66,10 +91,20 @@ const login = async (username, password) => {
 
   // Decrypt password received from front-end page
   let passwordInBytes = forge.util.hexToBytes(password);
-  const decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  let decryptedPassword = "";
+  try {
+    decryptedPassword = forgePrivateKey.decrypt(passwordInBytes);
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 
   // Check if existing user with username exists
   let existingUser = await getUserByUsername(username);
+  if (existingUser == null) {
+    console.log("User with username (" + username + ") not found.");
+    return null;
+  }
 
   // Compare hashed password to check validity of input account credentials
   let hashedPasswordToCompare = "";
@@ -85,26 +120,42 @@ const login = async (username, password) => {
 
   // If password is correct, return user information to caller
   if (existingUser.password == hashedPasswordToCompare) {
-    return existingUser;
+    // Set up environment variables for use
+    dotenv.config();
+    const accessToken = generateAccessToken(username, existingUser.userId);
+
+    return accessToken;
   }
 
   return null;
 };
 
+const generateAccessToken = (username, userId) => {
+  return jsonWebToken.sign(
+    { username: username, userId: userId },
+    process.env.TOKEN_SECRET,
+    {
+      expiresIn: "1800s",
+    }
+  );
+};
+
 const updateUser = async (
   userId,
-  firstName = "",
-  lastName = "",
+  name = "",
   username = "",
   email = "",
+  bio = "",
+  dateOfBirth = null,
   newPassword = ""
 ) => {
   // Ensure valid input parameters
   if (!Number.isInteger(userId)) return null;
-  if (!Commons.isString(firstName)) return null;
-  if (!Commons.isString(lastName)) return null;
+  if (!Commons.isString(name)) return null;
   if (!Commons.isString(username)) return null;
   if (!Commons.isString(email)) return null;
+  if (!Commons.isString(bio)) return null;
+  if (dateOfBirth != null && !Commons.isDate(dateOfBirth)) return null;
   if (!Commons.isString(newPassword)) return null;
 
   // Ensure there is existing user before updating it
@@ -115,17 +166,25 @@ const updateUser = async (
   }
 
   // Process input parameters and replace existing data if necessary
-  if (firstName.length > 0) existingUser.firstName = firstName;
-  if (lastName.length > 0) existingUser.lastName = lastName;
+  if (name.length > 0) existingUser.name = name;
   if (username.length > 0) existingUser.username = username;
   if (email.length > 0) existingUser.email = email;
+  if (bio.length > 0) existingUser.bio = bio;
+  if (dateOfBirth != null) existingUser.dob = dateOfBirth;
+
   if (newPassword.length > 0) {
     // Retrieve private key file contents to use for decryption of new password
     const forgePrivateKey = await Commons.getForgePrivateKey();
 
     // Decrypt password received from front-end page
     let newPasswordInBytes = forge.util.hexToBytes(newPassword);
-    const decryptedPassword = forgePrivateKey.decrypt(newPasswordInBytes);
+    let decryptedPassword = "";
+    try {
+      decryptedPassword = forgePrivateKey.decrypt(newPasswordInBytes);
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
 
     // Generate hashed password
     let newHashedPassword = "";
@@ -142,26 +201,38 @@ const updateUser = async (
     existingUser.password = newHashedPassword;
   }
 
-  // Call corresponding SQL query
-  let result = await UserModel.update(
-    {
-      firstName: existingUser.firstName,
-      lastName: existingUser.lastName,
-      username: existingUser.username,
-      email: existingUser.email,
-      password: existingUser.password,
-      updatedAt: Date.now(),
-    },
-    { where: { userId: userId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await UserModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingUser;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await UserModel.update(
+      {
+        name: existingUser.name,
+        username: existingUser.username,
+        email: existingUser.email,
+        bio: existingUser.bio,
+        dob: existingUser.dob,
+        password: existingUser.password,
+        updatedAt: Date.now(),
+      },
+      { where: { userId: userId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingUser;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -176,6 +247,7 @@ const getUserById = async (userId) => {
 
   // Return result back to caller
   if (retrievedUser) {
+    console.log("here");
     return retrievedUser;
   } else {
     return null;
@@ -199,18 +271,30 @@ const getUserByUsername = async (username) => {
   }
 };
 
-const getAllUsers = async () => {
+const getAllUsers = async (name = "", username = "", email = "") => {
+  // Craft filter condition
+  let whereCondition = {};
+  if (name.length > 0) {
+    whereCondition.name = name;
+  }
+  if (username.length > 0) {
+    whereCondition.username = username;
+  }
+  if (email.length > 0) {
+    whereCondition.email = email;
+  }
+
   // Call corresponding SQL query
   let retrievedUsers = await UserModel.findAll({
     attributes: [
-      "firstName",
-      "lastName",
+      "name",
       "username",
       "email",
       "password",
       "createdAt",
       "updatedAt",
     ],
+    where: whereCondition,
   });
 
   // Return result back to caller
@@ -223,15 +307,29 @@ const getAllUsers = async () => {
 
 const deleteUserById = async (userId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(userId)) return null;
+  if (!Number.isInteger(userId)) return false;
 
-  // Call corresponding SQL query
-  let result = await UserModel.destroy({ where: { userId: userId } });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await UserModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await UserModel.destroy({
+      where: { userId: userId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };

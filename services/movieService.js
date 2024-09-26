@@ -1,6 +1,7 @@
 const MovieModel = require("../models/movieModel.js");
 const { Op } = require("sequelize");
 const Commons = require("../common/commons.js");
+const movieGenreService = require("./movieGenreService.js");
 
 const createMovie = async (
   movieTitle,
@@ -20,22 +21,35 @@ const createMovie = async (
   if (!Number.isInteger(runningTime)) return null;
   if (!Commons.isDate(releaseDate)) return null;
 
-  // Call corresponding SQL query
-  let createdMovie = await MovieModel.create({
-    movieTitle: movieTitle,
-    language: language,
-    synopsis: synopsis,
-    posterUrl: posterUrl,
-    trailerUrl: trailerUrl,
-    runningTime: runningTime,
-    releaseDate: releaseDate,
-    createdAt: Date.now(),
-  });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (createdMovie) {
-    return createdMovie;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let createdMovie = await MovieModel.create(
+      {
+        movieTitle: movieTitle,
+        language: language,
+        synopsis: synopsis,
+        posterUrl: posterUrl,
+        trailerUrl: trailerUrl,
+        runningTime: runningTime,
+        releaseDate: releaseDate,
+        createdAt: Date.now(),
+      },
+      { transaction: dbTransaction }
+    );
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (createdMovie) {
+      return createdMovie;
+    } else {
+      return null;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return null;
   }
 };
@@ -76,28 +90,39 @@ const updateMovie = async (
   if (runningTime != -1) existingMovie.runningTime = runningTime;
   if (releaseDate != null) existingMovie.releaseDate = releaseDate;
 
-  // Call corresponding SQL query
-  let result = await MovieModel.update(
-    {
-      movieTitle: existingMovie.movieTitle,
-      language: existingMovie.language,
-      synopsis: existingMovie.synopsis,
-      posterUrl: existingMovie.posterUrl,
-      trailerUrl: existingMovie.trailerUrl,
-      runningTime: existingMovie.runningTime,
-      releaseDate: existingMovie.releaseDate,
-      updatedAt: Date.now(),
-    },
-    { where: { movieId: movieId } }
-  );
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    if (result && result.length > 0 && result[0] != 0) {
-      return existingMovie;
-    } else {
-      return null;
+  try {
+    // Call corresponding SQL query
+    let result = await MovieModel.update(
+      {
+        movieTitle: existingMovie.movieTitle,
+        language: existingMovie.language,
+        synopsis: existingMovie.synopsis,
+        posterUrl: existingMovie.posterUrl,
+        trailerUrl: existingMovie.trailerUrl,
+        runningTime: existingMovie.runningTime,
+        releaseDate: existingMovie.releaseDate,
+        updatedAt: Date.now(),
+      },
+      { where: { movieId: movieId }, transaction: dbTransaction }
+    );
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      if (result && result.length > 0 && result[0] != 0) {
+        return existingMovie;
+      } else {
+        return null;
+      }
     }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
+    return null;
   }
 };
 
@@ -109,6 +134,20 @@ const getMovieById = async (movieId) => {
   let retrievedMovie = await MovieModel.findOne({
     where: { movieId: movieId },
   });
+
+  // Populate genre of movie object
+  let movieGenreList = await movieGenreService.getAllMovieGenres(
+    retrievedMovie.movieId,
+    -1
+  );
+  if (movieGenreList != null) {
+    retrievedMovie.genres = [];
+    for (let i = 0; i < movieGenreList.length; i++) {
+      if (movieGenreList[i].genre != null) {
+        retrievedMovie.genres.push(movieGenreList[i].genre);
+      }
+    }
+  }
 
   // Return result back to caller
   if (retrievedMovie) {
@@ -126,6 +165,10 @@ const getAllMovies = async (
   fromReleaseDate = null,
   toReleaseDate = null
 ) => {
+  // Ensure valid input parameters
+  if (!Number.isInteger(fromRunningTime)) return null;
+  if (!Number.isInteger(toRunningTime)) return null;
+
   // Craft filter condition
   let whereCondition = {};
   if (movieTitle.length > 0) {
@@ -135,20 +178,40 @@ const getAllMovies = async (
     whereCondition.language = { [Op.like]: "%" + language + "%" };
   }
   if (fromRunningTime != -1) {
-    whereCondition.runningTime = { [Op.gte]: fromRunningTime };
+    if (!whereCondition.runningTime) {
+      whereCondition.runningTime = {};
+    }
+    whereCondition.runningTime[Op.gte] = fromRunningTime;
   }
   if (toRunningTime != -1) {
-    whereCondition.runningTime = { [Op.lte]: toRunningTime };
+    if (!whereCondition.runningTime) {
+      whereCondition.runningTime = {};
+    }
+    whereCondition.runningTime[Op.lte] = toRunningTime;
   }
-  if (fromReleaseDate != -1) {
+  if (fromReleaseDate != null) {
     whereCondition.releaseDate = { [Op.gte]: fromReleaseDate };
   }
-  if (toReleaseDate != -1) {
+  if (toReleaseDate != null) {
     whereCondition.releaseDate = { [Op.lte]: toReleaseDate };
   }
 
   // Call corresponding SQL query
   let retrievedMovies = await MovieModel.findAll({ where: whereCondition });
+
+  let retrievedMovieGenreList = await movieGenreService.getAllMovieGenres();
+  if (retrievedMovieGenreList != null) {
+    for (let i = 0; i < retrievedMovies.length; i++) {
+      retrievedMovies[i].genres = [];
+      for (let j = 0; j < retrievedMovieGenreList.length; j++) {
+        if (retrievedMovieGenreList[j].movieId === retrievedMovies[i].movieId) {
+          if (retrievedMovieGenreList[j].genre != null) {
+            retrievedMovies[i].genres.push(retrievedMovieGenreList[j].genre);
+          }
+        }
+      }
+    }
+  }
 
   // Return result back to caller
   if (retrievedMovies && retrievedMovies.length > 0) {
@@ -160,15 +223,29 @@ const getAllMovies = async (
 
 const deleteMovieById = async (movieId) => {
   // Ensure valid input parameters
-  if (!Number.isInteger(movieId)) return null;
+  if (!Number.isInteger(movieId)) return false;
 
-  // Call corresponding SQL query
-  let result = await MovieModel.destroy({ where: { movieId: movieId } });
+  // Start DB transaction to rollback save in case of query error
+  const dbTransaction = await MovieModel.sequelize.transaction();
 
-  // Return result back to caller
-  if (result) {
-    return true;
-  } else {
+  try {
+    // Call corresponding SQL query
+    let result = await MovieModel.destroy({
+      where: { movieId: movieId },
+      transaction: dbTransaction,
+    });
+
+    await dbTransaction.commit();
+
+    // Return result back to caller
+    if (result) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (transactionError) {
+    // If any error is experienced during query, roll back the transaction
+    await dbTransaction.rollback();
     return false;
   }
 };

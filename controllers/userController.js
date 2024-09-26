@@ -1,21 +1,15 @@
 const UserService = require("../services/userService.js");
 const Constants = require("../common/constants.js");
+const Commons = require("../common/commons.js");
 
 const createUser = async (req, res) => {
   if (req) {
     if (req.body) {
       // Validate request body parameters
-      if (!req.body.firstName) {
+      if (!req.body.name) {
         res.status(200).send({
           status: Constants.FAILED,
-          message: '"firstName" is not found in request.',
-        });
-        return;
-      }
-      if (!req.body.lastName) {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: '"lastName" is not found in request.',
+          message: '"name" is not found in request.',
         });
         return;
       }
@@ -42,16 +36,36 @@ const createUser = async (req, res) => {
       }
 
       // Extract and process body parameters from request
-      const firstName = req.body.firstName;
-      const lastName = req.body.lastName;
+      const name = req.body.name;
       const username = req.body.username;
       const email = req.body.email;
       const password = req.body.password;
 
+      let existingUserList = await UserService.getAllUsers("", username, email);
+      if (existingUserList && existingUserList.length > 0) {
+        for (let i = 0; i < existingUserList.length; i++) {
+          if (existingUserList[i].username == username) {
+            console.log("Username (" + username + ") already exists.");
+            res.status(200).send({
+              status: Constants.FAILED,
+              message: "Username (" + username + ") already exists.",
+            });
+            return;
+          } else if (existingUserList[i].email === email) {
+            console.log("Email (" + email + ") already exists.");
+            res.status(200).send({
+              status: Constants.FAILED,
+              message: "Email (" + email + ") already exists.",
+            });
+            return;
+          }
+        }
+        return;
+      }
+
       // Call corresponding service method
       let result = await UserService.createUser(
-        firstName,
-        lastName,
+        name,
         username,
         email,
         password
@@ -146,32 +160,39 @@ const login = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
+    return;
+  }
   if (req) {
     if (req.body) {
-      // Validate request body parameters
-      if (!req.body.userId) {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: '"userId" is not found in request.',
-        });
-        return;
-      }
-
       // Extract and process body parameters from request
-      const userId = req.body.userId;
-      const firstName = req.body.firstName ? req.body.firstName : "";
-      const lastName = req.body.lastName ? req.body.lastName : "";
+      const userId = req.user?.userId;
+      const name = req.body.name ? req.body.name : "";
       const username = req.body.username ? req.body.username : "";
       const email = req.body.email ? req.body.email : "";
+      const bio = req.body.bio ? req.body.bio : "";
       const password = req.body.password ? req.body.password : "";
+      let dateOfBirth = null;
+      if (req.body.dob) {
+        dateOfBirth = new Date(req.body.dob);
+        if (!Commons.isDate(dateOfBirth)) {
+          res.status(400).send({
+            status: Constants.FAILED,
+            message: '"dateOfBirth" (' + req.body.dob + ") format is invalid.",
+          });
+          return;
+        }
+      }
 
       // Call corresponding service method
       let result = await UserService.updateUser(
         userId,
-        firstName,
-        lastName,
+        name,
         username,
         email,
+        bio,
+        dateOfBirth,
         password
       );
 
@@ -207,22 +228,19 @@ const updateUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  let isAccessGranted = await Commons.authenticateToken(req, res);
+  if (!isAccessGranted) {
+    return;
+  }
   if (req) {
     if (req.body) {
-      // Validate request body parameters
-      if (!req.body.userId) {
-        res.status(200).send({
-          status: Constants.FAILED,
-          message: '"userId" is not found in request.',
-        });
-        return;
-      }
-
       // Extract and process body parameters from request
-      const userId = req.body.userId;
+      const userId = req.user?.userId;
 
       // Call corresponding service method
       let result = await UserService.getUserById(userId);
+      // Remove salt for security purposes
+      result.salt = undefined;
 
       // Send response back to caller based on result
       if (result) {
